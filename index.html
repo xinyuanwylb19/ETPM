@@ -1,0 +1,2837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>East Texas Pine Monitor</title>
+<meta name="description" content="Concept mockup of an online decision-support platform for forest risk and management in loblolly pine plantations. All data are simulated.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 54 54'%3E%3Crect width='54' height='54' rx='6' fill='%23243413'/%3E%3Cpath d='M27 6 L34 18 H30.5 L37 28 H32.5 L39 38 H15 L21.5 28 H17 L23.5 18 H20 Z' fill='%23fff'/%3E%3Crect x='25.3' y='38' width='3.4' height='9' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a public-agency content site (banner strip, white header, dark green nav bar, photo-style hero
+   with a dark title box, gray breadcrumb strip, gray side navigation beside a white main column), with the
+   working tools set into the main column as flat bordered panels. Single light theme by choice. */
+:root {
+  color-scheme: light;
+  --ink: #1b1b1b;
+  --ink-2: #3d4551;
+  --ink-3: #5c6470;
+  --paper: #ffffff;
+  --panel: #f0f0f0;
+  --line: #dfe1e2;
+  --line-strong: #a9aeb1;
+  --green-900: #243413;
+  --green-700: #154c21;
+  --green-800: #0f3a19;
+  --green-50: #e9efe2;
+  --focus: #2491ff;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --viewer: #0e1411;
+  --font: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--paper); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.6 var(--font); }
+img, canvas, svg { max-width: 100%; }
+a { color: var(--green-700); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--green-900); }
+:focus-visible { outline: 4px solid var(--focus); outline-offset: 0; }
+h1, h2, h3, h4 { color: var(--green-900); font-weight: 700; line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.skipnav { position: absolute; left: 0; top: -60px; background: var(--paper); padding: 8px 16px; z-index: 50; }
+.skipnav:focus { top: 0; }
+
+/* ---------- notice strip ---------- */
+.notice { background: var(--panel); font-size: 12.5px; line-height: 1.5; }
+.notice .wrap { padding-top: 5px; padding-bottom: 5px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.notice__tag { font-weight: 700; }
+
+/* ---------- header ---------- */
+.site-header { border-bottom: 1px solid var(--green-900); }
+.site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 14px; padding-bottom: 14px; }
+.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--ink); min-width: 0; }
+.brand:hover { color: var(--ink); }
+.brand svg { flex: none; width: 54px; height: 54px; display: block; }
+.brand__text { display: flex; flex-direction: column; min-width: 0; }
+.brand__name { font-size: 22px; font-weight: 700; line-height: 1.2; }
+.brand__sub { font-size: 15px; line-height: 1.25; text-transform: uppercase; letter-spacing: 0.01em; color: #1c1d1f; }
+.search { display: flex; gap: 8px; align-items: center; }
+.search input { width: 250px; height: 40px; padding: 8px; border: 1px solid var(--ink-2); border-radius: 0; background: var(--paper); }
+.menu-btn { display: none; background: var(--green-900); color: #fff; border: 0; font-weight: 400; text-transform: uppercase; padding: 0 16px; height: 48px; cursor: pointer; }
+
+.site-nav { background: var(--green-900); color: #fff; }
+.site-nav ul { list-style: none; margin: 0; padding: 8px 0; display: flex; flex-wrap: wrap; align-items: center; }
+.site-nav li { display: flex; align-items: center; }
+.site-nav li + li::before { content: ""; width: 1px; height: 14px; background: rgba(255, 255, 255, 0.75); }
+.site-nav a { color: #fff; text-decoration: none; font-size: 14.1px; font-weight: 700; line-height: 1; padding: 16px; display: block; }
+.site-nav li:first-child a { padding-left: 0; }
+.site-nav a span { display: inline-block; padding-bottom: 5px; border-bottom: 3px solid transparent; }
+.site-nav a:hover span { border-bottom-color: rgba(255, 255, 255, 0.55); }
+.site-nav a[aria-current="page"] span { border-bottom-color: #fff; }
+
+/* ---------- buttons, controls ---------- */
+.btn { background: var(--green-700); color: #fff; font-weight: 700; line-height: 1; padding: 12px 20px; border: 0; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+.btn:hover { background: var(--green-800); color: #fff; }
+.btn--outline { background: transparent; color: var(--green-700); box-shadow: inset 0 0 0 2px var(--green-700); }
+.btn--outline:hover { background: transparent; color: var(--green-900); box-shadow: inset 0 0 0 2px var(--green-900); }
+.btn--sm { padding: 9px 12px; font-size: 14px; }
+.btn[disabled] { background: #c9c9c9; color: #454545; cursor: default; }
+select, input[type="text"], input[type="search"], input[type="number"] { height: 40px; padding: 8px; border: 1px solid #565c65; border-radius: 0; background: var(--paper); max-width: 100%; }
+input[type="range"] { accent-color: var(--green-700); width: 100%; margin: 0; }
+label { font-size: 15px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field > span, .field > label { font-size: 14px; color: var(--ink-2); }
+.tag { display: inline-block; font-size: 12px; line-height: 1.5; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; background: #565c65; color: #fff; padding: 1px 8px; border-radius: 2px; white-space: nowrap; }
+.tag--light { background: var(--panel); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; }
+.chip i { width: 12px; height: 12px; border-radius: 2px; flex: none; display: inline-block; box-shadow: inset 0 0 0 1px rgba(27, 27, 27, 0.25); }
+.code { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 2px; font-size: 12px; font-weight: 700; color: #fff; flex: none; }
+.code--dark { color: var(--ink); }
+
+/* ---------- hero ---------- */
+.hero { position: relative; height: 384px; background: #1d2a1c linear-gradient(180deg, #3b5145 0%, #1f2c22 55%, #121a15 100%); overflow: hidden; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero .wrap { position: relative; height: 100%; }
+.hero__box { position: absolute; left: 48px; bottom: 56px; background: rgba(27, 27, 27, 0.9); color: #fff; border-radius: 2px; padding: 20px 28px 22px; max-width: min(560px, calc(100% - 64px)); }
+.hero__eyebrow { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #d6e6c8; }
+.hero__box h1 { color: #fff; font-size: 40px; line-height: 1.2; margin-top: 2px; }
+.hero__caption { position: absolute; right: 32px; bottom: 12px; color: rgba(255, 255, 255, 0.82); font-size: 12.5px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7); }
+
+/* ---------- breadcrumb ---------- */
+.crumbs { background: var(--panel); font-size: 13px; line-height: 1.2; }
+.crumbs ol { list-style: none; margin: 0; padding: 10px 0; display: flex; flex-wrap: wrap; gap: 4px 0; }
+.crumbs li + li::before { content: "\25B8"; margin: 0 10px; font-size: 10px; color: var(--ink-2); }
+.crumbs a { color: var(--ink); text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+
+/* ---------- page layout ---------- */
+.view { display: none; }
+.view.is-active { display: block; }
+.layout { display: grid; grid-template-columns: 292px minmax(0, 1fr); gap: 0 32px; padding-top: 12px; padding-bottom: 56px; align-items: start; }
+.side { background: var(--panel); padding: 0 16px 20px; }
+.side h2 { font-size: 24px; padding: 20px 0 14px; }
+.side h3 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ink-2); padding: 16px 0 8px; }
+.sidenav { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--line); }
+.sidenav li { border-top: 1px solid var(--line); }
+.sidenav a, .sidenav button { display: flex; width: 100%; justify-content: space-between; gap: 8px; align-items: baseline; text-align: left; background: none; border: 0; padding: 8px 12px 8px 16px; color: var(--ink-2); text-decoration: none; cursor: pointer; font-size: 16px; line-height: 1.4; position: relative; }
+.sidenav a:hover, .sidenav button:hover { color: var(--green-700); background: rgba(255, 255, 255, 0.6); }
+.sidenav .is-current { color: var(--green-900); font-weight: 700; }
+.sidenav .is-current::before { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px; background: var(--green-900); border-radius: 99px; }
+.sidenav small { font-size: 12.5px; color: var(--ink-3); font-weight: 400; white-space: nowrap; }
+.facts { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0; font-size: 15px; }
+.facts dt, .facts dd { margin: 0; padding: 7px 0; border-top: 1px solid var(--line); }
+.facts dt { color: var(--ink-2); }
+.facts dd { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+
+.main > h1 { font-size: 32px; margin: 21px 0 12px; }
+.main > hr, .rule { border: 0; border-top: 1px solid var(--line-strong); margin: 0 0 20px; }
+.lede { font-size: 17px; max-width: 68ch; }
+.main h2 { font-size: 24px; margin: 32px 0 10px; }
+.main h3 { font-size: 18px; margin: 0 0 6px; }
+.prose p { max-width: 70ch; margin-top: 12px; }
+.prose p:first-child { margin-top: 0; }
+.stack > * + * { margin-top: 20px; }
+
+/* ---------- stat tiles and cards ---------- */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+.tile { border: 1px solid var(--line); border-top: 4px solid var(--green-900); padding: 12px 14px 14px; background: var(--paper); }
+.tile b { display: block; font-size: 32px; line-height: 1.15; color: var(--ink); }
+.tile span { display: block; font-size: 14px; color: var(--ink-2); line-height: 1.35; margin-top: 2px; }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 12px; }
+.cards--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.card { border: 1px solid var(--line); padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--paper); }
+.card h3 { font-size: 19px; margin: 0; }
+.card p { font-size: 15.5px; color: var(--ink); }
+.card a.more { margin-top: auto; font-weight: 700; padding-top: 4px; }
+
+/* ---------- tool panels ---------- */
+.panel { border: 1px solid var(--line-strong); background: var(--paper); }
+.panel__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line-strong); }
+.panel__head h2, .panel__head h3 { font-size: 17px; margin: 0; color: var(--ink); }
+.panel__body { padding: 14px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.toolbar .grow { flex: 1 1 220px; min-width: 0; }
+.note { font-size: 13.5px; color: var(--ink-3); line-height: 1.45; }
+
+/* ---------- map ---------- */
+.map { position: relative; height: 540px; background: #e9ece4; overflow: hidden; touch-action: none; cursor: grab; }
+.map.is-drag { cursor: grabbing; }
+.map canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.map--small { height: 360px; }
+.map__ctrl { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 0; border: 1px solid var(--ink-2); background: var(--paper); }
+.map__ctrl button { width: 34px; height: 34px; border: 0; border-top: 1px solid var(--line); background: var(--paper); cursor: pointer; font-size: 18px; font-weight: 700; line-height: 1; color: var(--ink); }
+.map__ctrl button:first-child { border-top: 0; }
+.map__ctrl button:hover { background: var(--panel); }
+.map__scale { position: absolute; left: 12px; bottom: 10px; font-size: 11.5px; line-height: 1; color: var(--ink); pointer-events: none; }
+.map__scale i { display: block; height: 6px; border: 1.5px solid var(--ink); border-top: 0; margin-top: 3px; background: rgba(255, 255, 255, 0.6); }
+.map__north { position: absolute; left: 12px; top: 10px; width: 30px; height: 40px; pointer-events: none; }
+.map__stamp { position: absolute; right: 10px; bottom: 8px; background: rgba(255, 255, 255, 0.88); border: 1px solid var(--line-strong); padding: 2px 8px; font-size: 12px; pointer-events: none; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; font-size: 13.5px; padding: 10px 14px; border-top: 1px solid var(--line); }
+.legend__title { font-weight: 700; }
+.legend__ramp { flex: 1 1 260px; max-width: 420px; min-width: 200px; }
+.legend__bar { height: 12px; box-shadow: inset 0 0 0 1px rgba(27, 27, 27, 0.25); }
+.legend__ticks { position: relative; height: 16px; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.legend__ticks span { position: absolute; top: 2px; transform: translateX(-50%); white-space: nowrap; }
+.legend__ticks span:first-child { transform: none; }
+.legend__ticks span:last-child { transform: translateX(-100%); }
+.timebar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+.timebar__year { font-size: 22px; font-weight: 700; min-width: 3.2em; text-align: right; }
+.timebar > div { min-width: 0; }
+.timebar__ticks { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-3); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+.tooltip { position: fixed; z-index: 60; pointer-events: none; background: var(--paper); color: var(--ink); border: 1px solid var(--ink-2); padding: 7px 10px; font-size: 13.5px; line-height: 1.4; max-width: 280px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18); opacity: 0; transition: opacity 0.08s; }
+.tooltip.is-on { opacity: 1; }
+.tooltip b { display: block; }
+.tooltip .kv { display: flex; justify-content: space-between; gap: 16px; }
+
+/* ---------- stand detail ---------- */
+.detail { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 0; }
+.detail > div { padding: 14px; border-left: 1px solid var(--line); min-width: 0; }
+.detail > div:first-child { border-left: 0; }
+.detail h3 { font-size: 15px; color: var(--ink); margin-bottom: 8px; }
+.kvs { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; font-size: 14px; line-height: 1.4; }
+.kvs dt { color: var(--ink-2); }
+.kvs dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.bars { display: grid; gap: 10px; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; align-items: baseline; font-size: 14px; line-height: 1.35; }
+.bar__track { grid-column: 1 / -1; height: 12px; background: var(--panel); position: relative; }
+.bar__fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; }
+.bar__ghost { position: absolute; left: 0; top: 0; bottom: 0; border-right: 2px solid var(--ink); }
+.bar__val { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; white-space: nowrap; }
+.action { border-left: 4px solid var(--green-900); background: var(--green-50); padding: 10px 12px; font-size: 14.5px; }
+.action b { display: block; font-size: 16px; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart__legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-2); margin-bottom: 4px; }
+.chart__legend i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
+
+/* ---------- tables ---------- */
+.tablewrap { overflow-x: auto; }
+table.data { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+table.data caption { text-align: left; font-weight: 700; padding: 0 0 8px; }
+table.data th, table.data td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; white-space: nowrap; }
+table.data thead th { border-bottom: 1px solid var(--ink); font-size: 13.5px; color: var(--ink-2); font-weight: 700; background: var(--paper); }
+table.data td.r, table.data th.r { text-align: right; font-variant-numeric: tabular-nums; }
+table.data tbody tr { cursor: pointer; }
+table.data tbody tr:hover { background: var(--panel); }
+table.data tbody tr.is-selected { background: var(--green-50); box-shadow: inset 4px 0 0 var(--green-900); }
+table.data td.wrapcell { white-space: normal; min-width: 220px; }
+
+/* ---------- treatment calendar ---------- */
+.cal { display: grid; grid-template-columns: 150px minmax(0, 1fr); font-size: 13px; min-width: 640px; }
+.cal__head, .cal__row { display: contents; }
+.cal__label { padding: 5px 8px 5px 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cal__track { position: relative; border-bottom: 1px solid var(--line); min-height: 28px; background-image: linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: calc(100% / 24) 100%; }
+.cal__months { display: grid; grid-template-columns: repeat(24, 1fr); border-bottom: 1px solid var(--ink); font-size: 11px; color: var(--ink-2); }
+.cal__months > span { padding: 2px 0 3px 3px; border-left: 1px solid var(--line); white-space: nowrap; overflow: hidden; }
+.cal__years { display: grid; grid-template-columns: repeat(24, 1fr); font-size: 12px; font-weight: 700; color: var(--ink); }
+.cal__years > span { padding: 0 0 2px 3px; border-left: 1px solid var(--line-strong); }
+.cal__corner { border-bottom: 0; }
+.cal__bar { position: absolute; top: 5px; height: 18px; border-radius: 4px; min-width: 6px; }
+.cal__row:hover .cal__label, .cal__row:hover .cal__track { background-color: var(--panel); }
+
+/* ---------- 3D viewer ---------- */
+.viewer { position: relative; height: 560px; background: var(--viewer); overflow: hidden; touch-action: none; cursor: grab; }
+.viewer.is-drag { cursor: grabbing; }
+.viewer canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.viewer__hud { position: absolute; left: 12px; top: 10px; color: #e8efe6; font-size: 13px; line-height: 1.45; pointer-events: none; text-shadow: 0 1px 2px #000; }
+.viewer__hud b { font-size: 15px; display: block; }
+.viewer__legend { position: absolute; left: 12px; bottom: 12px; color: #e8efe6; font-size: 12px; pointer-events: none; min-width: 180px; text-shadow: 0 1px 2px #000; }
+.viewer__legend .legend__bar { box-shadow: none; height: 10px; }
+.viewer__legend .legend__ticks { color: #cfd8cc; }
+.viewer__legend .chip { color: #e8efe6; font-size: 12px; margin-right: 10px; }
+.viewer__btns { position: absolute; right: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%; }
+.viewer__btns button { background: rgba(14, 20, 17, 0.72); color: #e8efe6; border: 1px solid rgba(232, 239, 230, 0.55); border-radius: 2px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+.viewer__btns button:hover { background: rgba(60, 80, 66, 0.9); }
+.viewer__btns button[aria-pressed="true"] { background: #e8efe6; color: #0e1411; }
+.viewer__hint { position: absolute; right: 12px; bottom: 10px; color: rgba(232, 239, 230, 0.75); font-size: 12px; pointer-events: none; }
+.viewer__fallback { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; color: #e8efe6; padding: 24px; text-align: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 0; }
+.split > div { padding: 14px; min-width: 0; }
+.split > div + div { border-left: 1px solid var(--line); }
+.profile { width: 100%; height: 190px; display: block; background: var(--viewer); }
+.strata { display: grid; gap: 9px; }
+
+/* ---------- tools ---------- */
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.two > div { min-width: 0; }
+.drivers { display: grid; gap: 9px; }
+.before-after { display: grid; gap: 12px; }
+.ba { display: grid; grid-template-columns: 92px minmax(0, 1fr) 96px; gap: 8px; align-items: center; font-size: 14px; }
+.ba__tracks { display: grid; gap: 3px; }
+.ba__t { height: 10px; background: var(--panel); position: relative; }
+.ba__t i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; }
+.ba__n { font-variant-numeric: tabular-nums; text-align: right; }
+.ba__n b { font-weight: 700; }
+.summary-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.summary-row .tile b { font-size: 26px; }
+.flow { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr); align-items: stretch; margin-top: 12px; }
+.flow__col { border: 1px solid var(--line-strong); }
+.flow__col h3 { background: var(--green-900); color: #fff; font-size: 15px; padding: 8px 12px; margin: 0; }
+.flow__col ul { list-style: none; margin: 0; padding: 4px 12px 10px; font-size: 14.5px; }
+.flow__col li { padding: 6px 0; border-top: 1px solid var(--line); }
+.flow__col li:first-child { border-top: 0; }
+.flow__arrow { display: flex; align-items: center; justify-content: center; color: var(--green-900); font-size: 22px; font-weight: 700; }
+
+/* ---------- footer ---------- */
+.site-footer { margin-top: 8px; }
+.footer-nav { background: var(--panel); }
+.footer-nav ul { list-style: none; margin: 0; padding: 4px 0; display: flex; flex-wrap: wrap; gap: 0 32px; }
+.footer-nav a { display: block; padding: 14px 0; color: var(--ink); font-weight: 700; text-decoration: none; }
+.footer-nav a:hover { text-decoration: underline; }
+.footer-note { background: var(--panel); border-top: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
+.footer-note .wrap { padding-top: 14px; padding-bottom: 18px; max-width: 1200px; }
+.footer-note p { max-width: 90ch; }
+.footer-brand { background: var(--paper); }
+.footer-brand .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; padding-bottom: 24px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1020px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .side { order: 2; margin-top: 28px; }
+  .side--controls { order: 0; margin-top: 0; }
+  .detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .detail > div:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .flow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .flow__arrow { transform: rotate(90deg); height: 24px; }
+}
+@media (max-width: 760px) {
+  .wrap { padding: 0 16px; }
+  .search { display: none; }
+  .menu-btn { display: block; flex: none; }
+  .site-header__inner { padding-top: 10px; padding-bottom: 10px; }
+  .brand svg { width: 44px; height: 44px; }
+  .brand__name { font-size: 18px; }
+  .brand__sub { font-size: 11.5px; }
+  .site-nav { display: none; }
+  .site-nav.is-open { display: block; }
+  .site-nav ul { flex-direction: column; align-items: stretch; padding: 4px 0; }
+  .site-nav li + li::before { display: none; }
+  .site-nav a, .site-nav li:first-child a { padding: 12px 0; }
+  .hero { height: 280px; }
+  .hero__box { left: 16px; bottom: 36px; padding: 14px 18px 16px; }
+  .hero__box h1 { font-size: 30px; }
+  .hero__caption { display: none; }
+  .main > h1 { font-size: 28px; }
+  .cards, .cards--3, .two, .split, .detail, .summary-row { grid-template-columns: minmax(0, 1fr); }
+  .detail > div, .split > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .detail > div:first-child { border-top: 0; }
+  .map { height: 420px; }
+  .map--small { height: 300px; }
+  .viewer { height: 440px; }
+  .viewer__hint { display: none; }
+  .viewer__hud { max-width: calc(100% - 24px); }
+  .viewer__btns { top: auto; bottom: 10px; right: 10px; max-width: 48%; }
+  .viewer__btns button { padding: 5px 8px; font-size: 12.5px; }
+  .viewer__legend { max-width: 50%; min-width: 0; }
+  .viewer__legend .chip { display: flex; margin: 2px 0 0; }
+  .timebar { grid-template-columns: minmax(0, 1fr) auto; }
+  .timebar > .btn { grid-column: 1 / -1; justify-self: start; }
+  .timebar__ticks span:nth-child(even) { visibility: hidden; width: 0; }
+  .side--controls { padding-bottom: 14px; }
+  .side--controls h2 { font-size: 20px; padding: 14px 0 8px; }
+  .side--controls h3 { padding: 10px 0 6px; }
+  .side--controls .sidenav { display: flex; flex-wrap: wrap; gap: 6px; border: 0; }
+  .side--controls .sidenav li { border: 1px solid var(--line-strong); background: var(--paper); }
+  .side--controls .sidenav a, .side--controls .sidenav button { padding: 6px 10px 6px 12px; font-size: 14.5px; }
+  .side--controls .sidenav small { display: none; }
+  .side--controls .facts { margin-top: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+
+</style>
+</head>
+<body>
+<a class="skipnav" href="#main" id="skipLink">Skip to main content</a>
+
+<div class="notice">
+  <div class="wrap"><span class="notice__tag">Concept mockup</span><span>Every map, point cloud and number on this site is a simulated example. Nothing here measures a real forest.</span></div>
+</div>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="#overview" aria-label="East Texas Pine Monitor, home">
+      <svg viewBox="0 0 54 54" aria-hidden="true">
+        <rect width="54" height="54" rx="3" fill="#243413"/>
+        <g fill="#b9d6a3">
+          <circle cx="9" cy="42" r="1.3"/><circle cx="13" cy="45" r="1.3"/><circle cx="17" cy="41.5" r="1.3"/><circle cx="21" cy="45.5" r="1.3"/>
+          <circle cx="33" cy="45.5" r="1.3"/><circle cx="37" cy="41.5" r="1.3"/><circle cx="41" cy="45" r="1.3"/><circle cx="45" cy="42" r="1.3"/>
+          <circle cx="11" cy="30" r="1.1"/><circle cx="14" cy="24" r="1.1"/><circle cx="40" cy="24" r="1.1"/><circle cx="43" cy="30" r="1.1"/>
+          <circle cx="12" cy="17" r="1"/><circle cx="42" cy="17" r="1"/>
+        </g>
+        <path d="M27 6 L34 18 H30.5 L37 28 H32.5 L39 38 H15 L21.5 28 H17 L23.5 18 H20 Z" fill="#ffffff"/>
+        <rect x="25.3" y="38" width="3.4" height="9" fill="#ffffff"/>
+      </svg>
+      <span class="brand__text">
+        <span class="brand__name">East Texas Pine Monitor</span>
+        <span class="brand__sub">Forest risk and management decision support</span>
+      </span>
+    </a>
+    <form class="search" id="standSearch" role="search">
+      <label class="sr-only" for="standSearchInput">Find a stand by number</label>
+      <input type="search" id="standSearchInput" placeholder="Find a stand, 1 to 40" inputmode="numeric" autocomplete="off">
+      <button class="btn" type="submit">Go</button>
+    </form>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button>
+  </div>
+  <nav class="site-nav" id="siteNav" aria-label="Primary">
+    <div class="wrap">
+      <ul>
+        <li><a href="#overview" data-nav="overview"><span>Overview</span></a></li>
+        <li><a href="#risk-maps" data-nav="risk-maps"><span>Risk Maps</span></a></li>
+        <li><a href="#priorities" data-nav="priorities"><span>Management Priorities</span></a></li>
+        <li><a href="#forest-3d" data-nav="forest-3d"><span>3D Forest</span></a></li>
+        <li><a href="#tools" data-nav="tools"><span>AI Tools</span></a></li>
+        <li><a href="#data" data-nav="data"><span>Data and Methods</span></a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+
+<!-- ================= Overview ================= -->
+<section class="view" id="view-overview" aria-labelledby="h-overview">
+  <div class="hero">
+    <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <div class="hero__box">
+        <div class="hero__eyebrow">Example forest</div>
+        <h1>Pine Hollow Tract</h1>
+      </div>
+      <div class="hero__caption">Simulated airborne lidar point cloud, colored by height</div>
+    </div>
+  </div>
+  <nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol><li><a href="#overview">Home</a></li><li>Example forests</li><li aria-current="page">Pine Hollow Tract</li></ol></div></nav>
+  <div class="wrap layout">
+    <aside class="side">
+      <h2>On this site</h2>
+      <ul class="sidenav">
+        <li><a href="#risk-maps">Risk maps</a></li>
+        <li><a href="#priorities">Management priorities</a></li>
+        <li><a href="#forest-3d">3D forest</a></li>
+        <li><a href="#tools">AI tools</a></li>
+        <li><a href="#data">Data and methods</a></li>
+      </ul>
+      <h2>Forest at a glance</h2>
+      <dl class="facts" id="ovFacts"></dl>
+    </aside>
+    <div class="main">
+      <h1 id="h-overview">Pine Hollow Tract</h1>
+      <hr>
+      <p class="lede" id="ovLede"></p>
+      <div class="tiles" id="ovTiles"></div>
+
+      <h2>Where risk is highest now</h2>
+      <div class="panel">
+        <div class="panel__head"><h3>Combined risk class, 2026</h3><span class="tag tag--light">Example data</span></div>
+        <div id="ovMap" class="map--small"></div>
+        <div class="legend" id="ovLegend"></div>
+      </div>
+      <p class="note" style="margin-top:8px">Click a stand to open its record in the risk maps.</p>
+
+      <h2>What you can do here</h2>
+      <div class="cards">
+        <div class="card"><h3>Risk maps</h3><p>See forest structure, forest health, and wildfire, drought and pest risk for every stand, for each year since 2019.</p><a class="more" href="#risk-maps">Open the risk maps</a></div>
+        <div class="card"><h3>Management priorities</h3><p>Find where thinning, prescribed burning, fuel reduction, pest control and salvage harvesting are needed most, and when to schedule them.</p><a class="more" href="#priorities">See the priorities</a></div>
+        <div class="card"><h3>3D forest</h3><p>Look inside a stand. Rotate a lidar point cloud to see tree heights, planting rows, understory fuels and beetle damage.</p><a class="more" href="#forest-3d">Open the 3D viewer</a></div>
+        <div class="card"><h3>AI tools</h3><p>Get a recommended treatment for one stand with the reasons behind it, or build a treatment plan for the whole tract.</p><a class="more" href="#tools">Try the tools</a></div>
+      </div>
+
+      <h2>Who it is for</h2>
+      <div class="cards cards--3">
+        <div class="card"><h3>Landowners</h3><p>Check the condition of your pine stands and see what to do next, with no specialist software.</p></div>
+        <div class="card"><h3>Foresters</h3><p>Use stand-level density, height, fuel and health estimates to plan field visits and write prescriptions.</p></div>
+        <div class="card"><h3>Forestry agencies</h3><p>Compare risk across ownerships and direct technical and cost-share help to where it reduces the most risk.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Risk maps ================= -->
+<section class="view" id="view-risk-maps" aria-labelledby="h-risk">
+  <nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol><li><a href="#overview">Home</a></li><li><a href="#overview">Pine Hollow Tract</a></li><li aria-current="page">Risk maps</li></ol></div></nav>
+  <div class="wrap layout">
+    <aside class="side side--controls">
+      <h2>Map layers</h2>
+      <div id="rmLayers"></div>
+    </aside>
+    <div class="main">
+      <h1 id="h-risk">Risk maps</h1>
+      <hr>
+      <p class="lede">Choose a layer and a year. Click a stand to see its record below the map.</p>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel__head"><h2 id="rmTitle">Combined risk class</h2><span class="tag tag--light">Example data</span></div>
+        <div id="rmMap"></div>
+        <div class="legend" id="rmLegend"></div>
+        <div class="timebar">
+          <button class="btn btn--sm btn--outline" id="rmPlay" type="button">Play 2019 to 2026</button>
+          <div>
+            <label class="sr-only" for="rmYear">Year</label>
+            <input type="range" id="rmYear" min="0" max="7" step="1" value="7">
+            <div class="timebar__ticks" id="rmYearTicks" aria-hidden="true"></div>
+          </div>
+          <div class="timebar__year num" id="rmYearLabel">2026</div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel__head">
+          <h2 id="rmStandTitle">Stand</h2>
+          <div class="toolbar"><a class="btn btn--sm btn--outline" href="#forest-3d">View in 3D</a><a class="btn btn--sm" href="#tools">Open the treatment advisor</a></div>
+        </div>
+        <div class="detail">
+          <div><h3>Stand record</h3><dl class="kvs" id="rmFacts"></dl><p class="note" id="rmEvents" style="margin-top:10px"></p></div>
+          <div><h3 id="rmChartTitle">Trend</h3><div id="rmChart"></div></div>
+          <div><h3 id="rmRiskTitle">Risk</h3><div class="bars" id="rmRisk"></div><div class="action" id="rmAction" style="margin-top:12px"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Management priorities ================= -->
+<section class="view" id="view-priorities" aria-labelledby="h-prio">
+  <nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol><li><a href="#overview">Home</a></li><li><a href="#overview">Pine Hollow Tract</a></li><li aria-current="page">Management priorities</li></ol></div></nav>
+  <div class="wrap layout">
+    <aside class="side side--controls">
+      <h2>Show practices</h2>
+      <ul class="sidenav" id="prFilter"></ul>
+      <h2>Priority classes</h2>
+      <dl class="facts" id="prCounts"></dl>
+    </aside>
+    <div class="main">
+      <h1 id="h-prio">Management priorities</h1>
+      <hr>
+      <p class="lede">The map shows where treatment is needed and the calendar shows when. Both are rebuilt each time new data arrive.</p>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel__head"><h2>Priority map, updated November 2026</h2><span class="tag tag--light">Example data</span></div>
+        <div id="prMap"></div>
+        <div class="legend" id="prLegend"></div>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel__head"><h2>Treatment calendar, December 2026 to November 2028</h2><span class="tag tag--light">Example data</span></div>
+        <div class="panel__body tablewrap"><div id="prCal"></div></div>
+      </div>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel__head"><h2 id="prTableTitle">Stands ranked by priority</h2><span class="note">Click a row to highlight the stand on the map</span></div>
+        <div class="tablewrap"><table class="data" id="prTable"></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3D forest ================= -->
+<section class="view" id="view-forest-3d" aria-labelledby="h-3d">
+  <nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol><li><a href="#overview">Home</a></li><li><a href="#overview">Pine Hollow Tract</a></li><li aria-current="page">3D forest</li></ol></div></nav>
+  <div class="wrap layout">
+    <aside class="side side--controls">
+      <h2>Sample plot</h2>
+      <div class="stack" style="padding-bottom:4px">
+        <div class="field"><label for="v3Stand">Stand</label><select id="v3Stand"></select></div>
+        <div class="field"><label for="v3Year">Year <b class="num" id="v3YearLabel">2026</b></label><input type="range" id="v3Year" min="0" max="7" step="1" value="7"></div>
+        <div class="field"><label for="v3Size">Point size</label><input type="range" id="v3Size" min="8" max="40" step="1" value="20"></div>
+        <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="v3Auto" checked> Rotate slowly</label>
+        <label style="display:flex;gap:8px;align-items:center" id="v3AfterWrap"><input type="checkbox" id="v3After"> Show after thinning</label>
+      </div>
+      <h2>Color by</h2>
+      <ul class="sidenav" id="v3Modes"></ul>
+    </aside>
+    <div class="main">
+      <h1 id="h-3d">3D forest</h1>
+      <hr>
+      <p class="lede">A lidar point cloud for a 1.5-acre sample plot in the selected stand. Drag to rotate, scroll to zoom, and hold Shift while dragging to move.</p>
+      <div class="panel" style="margin-top:20px">
+        <div class="panel__head"><h2 id="v3Title">Stand</h2><span class="tag tag--light">Simulated point cloud</span></div>
+        <div class="viewer" id="v3Box">
+          <canvas id="v3Canvas" role="img" aria-label="Three-dimensional lidar point cloud of the sample plot"></canvas>
+          <div class="viewer__fallback" id="v3Fallback">This browser cannot show the 3D view. The profile and the numbers below still describe the plot.</div>
+          <div class="viewer__hud" id="v3Hud"></div>
+          <div class="viewer__btns">
+            <button type="button" data-view="persp">Perspective</button>
+            <button type="button" data-view="top">Top</button>
+            <button type="button" data-view="side">Side</button>
+          </div>
+          <div class="viewer__legend" id="v3Legend"></div>
+          <div class="viewer__hint" id="v3Hint"></div>
+        </div>
+        <div class="split" style="border-top:1px solid var(--line)">
+          <div><h3>Vertical profile</h3><p class="note" style="margin-bottom:8px">A 20-foot-wide slice through the middle of the plot.</p><canvas class="profile" id="v3Profile" role="img" aria-label="Side profile of the point cloud"></canvas></div>
+          <div><h3>What the points show</h3><dl class="kvs" id="v3Stats" style="margin-bottom:14px"></dl><h3>Returns by height</h3><div class="strata" id="v3Strata"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= AI tools ================= -->
+<section class="view" id="view-tools" aria-labelledby="h-tools">
+  <nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol><li><a href="#overview">Home</a></li><li><a href="#overview">Pine Hollow Tract</a></li><li aria-current="page">AI tools</li></ol></div></nav>
+  <div class="wrap layout">
+    <aside class="side side--controls">
+      <h2>Tools</h2>
+      <ul class="sidenav" id="tlNav">
+        <li><button type="button" data-tool="advisor" class="is-current">Treatment advisor</button></li>
+        <li><button type="button" data-tool="planner">Treatment planner</button></li>
+      </ul>
+      <h2>How they work</h2>
+      <p style="font-size:15px;color:var(--ink-2)">On the platform, models trained on lidar, imagery and inventory data estimate each stand's condition, score its risks, and test what a treatment would change. In this mockup, simple rules stand in for those models.</p>
+    </aside>
+    <div class="main">
+      <h1 id="h-tools">AI tools</h1>
+      <hr>
+      <p class="lede">Two tools turn the maps into decisions. The advisor explains what one stand needs. The planner picks the stands to treat with the acres you can cover.</p>
+
+      <div class="panel" id="tlAdvisor" style="margin-top:20px">
+        <div class="panel__head"><h2>Treatment advisor</h2><span class="tag tag--light">Example output</span></div>
+        <div class="panel__body">
+          <div class="toolbar">
+            <div class="field"><label for="adStand">Stand</label><select id="adStand"></select></div>
+            <div class="field"><label for="adPractice">Treatment to test</label><select id="adPractice"></select></div>
+            <div class="field grow" id="adResWrap"><label for="adRes">Basal area left after thinning: <b class="num" id="adResLabel">75</b> ft²/ac</label><input type="range" id="adRes" min="60" max="100" step="5" value="75"></div>
+          </div>
+          <div class="two" style="margin-top:18px">
+            <div class="stack">
+              <div class="action" id="adAction"></div>
+              <div><h3>What drives the risk</h3><div class="drivers" id="adDrivers"></div></div>
+            </div>
+            <div class="stack">
+              <div><h3>Risk now and after treatment</h3><div class="before-after" id="adBefore"></div><p class="note" id="adNote" style="margin-top:8px"></p></div>
+              <div><h3 id="adChartTitle">Stand density over the next 10 years</h3><div id="adChart"></div></div>
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top:16px"><a class="btn btn--sm btn--outline" href="#forest-3d" id="adTo3d">Preview this stand in 3D</a><a class="btn btn--sm btn--outline" href="#risk-maps">Show on the risk map</a></div>
+        </div>
+      </div>
+
+      <div class="panel" id="tlPlanner" style="margin-top:20px">
+        <div class="panel__head"><h2>Treatment planner</h2><span class="tag tag--light">Example output</span></div>
+        <div class="panel__body">
+          <div class="toolbar">
+            <div class="field"><label for="plGoal">Reduce</label><select id="plGoal"><option value="all">All three risks</option><option value="wf">Wildfire risk</option><option value="dr">Drought risk</option><option value="pr">Pest risk</option></select></div>
+            <div class="field grow"><label for="plCap">Acres you can treat over the next 24 months: <b class="num" id="plCapLabel">250</b></label><input type="range" id="plCap" min="50" max="700" step="25" value="250"></div>
+          </div>
+          <div class="summary-row" id="plSummary" style="margin-top:16px"></div>
+          <div class="two" style="margin-top:16px">
+            <div><div id="plMap" class="map--small"></div><p class="note" style="margin-top:6px">Outlined stands are in the plan. Letters show the practice.</p></div>
+            <div class="tablewrap"><table class="data" id="plTable"></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= Data and methods ================= -->
+<section class="view" id="view-data" aria-labelledby="h-data">
+  <nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol><li><a href="#overview">Home</a></li><li aria-current="page">Data and methods</li></ol></div></nav>
+  <div class="wrap layout">
+    <aside class="side">
+      <h2>Related pages</h2>
+      <ul class="sidenav">
+        <li><a href="#risk-maps">Risk maps</a></li>
+        <li><a href="#priorities">Management priorities</a></li>
+        <li><a href="#forest-3d">3D forest</a></li>
+        <li><a href="#tools">AI tools</a></li>
+      </ul>
+      <h2>About this mockup</h2>
+      <p style="font-size:15px;color:var(--ink-2)">The site shows how the platform would look and behave. The tract, its stands, the point clouds and every value are generated in your browser for illustration.</p>
+    </aside>
+    <div class="main prose">
+      <h1 id="h-data">Data and methods</h1>
+      <hr>
+      <p class="lede">The platform keeps a digital record of every pine plantation and updates it as new data arrive. This page describes how that record would be built.</p>
+
+      <h2>From data to decisions</h2>
+      <div class="flow">
+        <div class="flow__col"><h3>Data</h3><ul><li>Spaceborne lidar</li><li>Airborne laser scanning</li><li>Satellite imagery</li><li>Aerial images</li><li>Forest inventory plots</li></ul></div>
+        <div class="flow__arrow" aria-hidden="true">&rarr;</div>
+        <div class="flow__col"><h3>AI models</h3><ul><li>Link remote sensing products to inventory measurements</li><li>Map each attribute for every plantation</li><li>Update the maps regularly</li></ul></div>
+        <div class="flow__arrow" aria-hidden="true">&rarr;</div>
+        <div class="flow__col"><h3>Digital record</h3><ul><li>Forest density, canopy height and cover</li><li>Aboveground biomass and fuel loads</li><li>Water stress, pest damage and tree mortality</li></ul></div>
+        <div class="flow__arrow" aria-hidden="true">&rarr;</div>
+        <div class="flow__col"><h3>Products</h3><ul><li>Forest risk maps</li><li>Timely management priority maps</li><li>This decision-support platform</li></ul></div>
+      </div>
+
+      <h2>Layers in the mockup</h2>
+      <div class="tablewrap"><table class="data" id="dtLayers"></table></div>
+
+      <h2>How the example values are made</h2>
+      <p>Each stand is given a planting year, a site index, a planting density and a management history of thinnings and prescribed burns. A simple growth model then carries basal area, height and stem count forward one year at a time from planting to 2026. Fuel builds up with the years since the last burn, and water stress follows a dry or wet index for each year.</p>
+      <p>The three risk indices combine those values on a scale of 0 to 100. Wildfire risk rises with fuel load, understory and dry weather. Drought risk rises with stand density and sandy soil. Pest risk rises with density, water stress and bark beetle activity in the stand or next to it. The priority rules read the same values: an active beetle spot is urgent, a dense stand needs thinning, and heavy fuel calls for a burn or, where trees are too young to burn under, fuel reduction.</p>
+      <p>The 3D point clouds are drawn from the same stand record, so tree height, spacing, thinned rows, understory and dead crowns match the numbers on the maps.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-nav">
+    <div class="wrap">
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#risk-maps">Risk Maps</a></li>
+        <li><a href="#priorities">Management Priorities</a></li>
+        <li><a href="#forest-3d">3D Forest</a></li>
+        <li><a href="#tools">AI Tools</a></li>
+        <li><a href="#data">Data and Methods</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-note">
+    <div class="wrap"><p>East Texas Pine Monitor is a concept mockup for a proposed project on digitalizing and monitoring forest risks to prioritize active management of private loblolly pine plantations in East Texas. All data shown are simulated.</p></div>
+  </div>
+  <div class="footer-brand">
+    <div class="wrap">
+      <a class="brand" href="#overview" aria-label="East Texas Pine Monitor, home">
+        <svg viewBox="0 0 54 54" aria-hidden="true"><rect width="54" height="54" rx="3" fill="#243413"/><path d="M27 6 L34 18 H30.5 L37 28 H32.5 L39 38 H15 L21.5 28 H17 L23.5 18 H20 Z" fill="#ffffff"/><rect x="25.3" y="38" width="3.4" height="9" fill="#ffffff"/></svg>
+        <span class="brand__text"><span class="brand__name">East Texas Pine Monitor</span><span class="brand__sub">Forest risk and management decision support</span></span>
+      </a>
+      <span class="note">Concept mockup &middot; Example data &middot; November 2026</span>
+    </div>
+  </div>
+</footer>
+
+<div class="tooltip" id="tooltip" role="status"></div>
+
+<script>
+/* ---------- small helpers shared by every module ---------- */
+'use strict';
+
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const norm = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
+const M2FT = 3.28084;
+const M2_PER_ACRE = 4046.8564;
+
+/* Seeded random numbers, so the example forest is identical on every load. */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function randn(rng) {
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+/* Value noise and fractal noise in 2D, range 0..1. */
+function hash2(ix, iy, seed) {
+  let h = (Math.imul(ix, 374761393) + Math.imul(iy, 668265263) + Math.imul(seed, 1442695041)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+function vnoise(x, y, seed) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  const fx = x - ix, fy = y - iy;
+  const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const a = hash2(ix, iy, seed), b = hash2(ix + 1, iy, seed);
+  const c = hash2(ix, iy + 1, seed), d = hash2(ix + 1, iy + 1, seed);
+  return lerp(lerp(a, b, sx), lerp(c, d, sx), sy);
+}
+function fbm(x, y, seed, oct) {
+  let s = 0, amp = 0.5, f = 1, n = 0;
+  for (let i = 0; i < (oct || 4); i++) {
+    s += amp * vnoise(x * f, y * f, seed + i * 17);
+    n += amp; amp *= 0.5; f *= 2;
+  }
+  return s / n;
+}
+
+/* ---------- color ---------- */
+function oklchToRgb(L, C, hDeg) {
+  const h = (hDeg * Math.PI) / 180;
+  const a = C * Math.cos(h), b = C * Math.sin(h);
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+  const l = l_ * l_ * l_, m = m_ * m_ * m_, s = s_ * s_ * s_;
+  const lin = [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+  return lin.map((x) => {
+    x = clamp(x, 0, 1);
+    const g = x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+    return Math.round(clamp(g, 0, 1) * 255);
+  });
+}
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+const rgbCss = (c, a) => (a == null ? `rgb(${c[0]},${c[1]},${c[2]})` : `rgba(${c[0]},${c[1]},${c[2]},${a})`);
+
+/* One-hue sequential ramp, light to dark, as a 64-step lookup table. */
+const RAMP_L = [0.972, 0.915, 0.835, 0.74, 0.635, 0.53, 0.43, 0.335];
+const RAMP_C = [0.16, 0.4, 0.68, 0.9, 1.0, 0.96, 0.84, 0.68];
+function makeRamp(hue, cmax) {
+  const stops = RAMP_L.map((L, i) => oklchToRgb(L, RAMP_C[i] * cmax, hue));
+  const lut = [];
+  for (let i = 0; i < 64; i++) {
+    const p = (i / 63) * (stops.length - 1);
+    const k = Math.min(stops.length - 2, Math.floor(p)), t = p - k;
+    lut.push([0, 1, 2].map((j) => Math.round(lerp(stops[k][j], stops[k + 1][j], t))));
+  }
+  const fn = (t) => lut[Math.round(clamp(t, 0, 1) * 63)];
+  fn.css = (t) => rgbCss(fn(t));
+  fn.gradient = () => {
+    const parts = [];
+    for (let i = 0; i <= 8; i++) parts.push(`${rgbCss(fn(i / 8))} ${((i / 8) * 100).toFixed(1)}%`);
+    return `linear-gradient(90deg, ${parts.join(', ')})`;
+  };
+  return fn;
+}
+
+/* ---------- geometry ---------- */
+function polyArea(p) {
+  let a = 0;
+  for (let i = 0, n = p.length; i < n; i++) {
+    const q = p[(i + 1) % n];
+    a += p[i][0] * q[1] - q[0] * p[i][1];
+  }
+  return a / 2;
+}
+function pointInPoly(x, y, p) {
+  let inside = false;
+  for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+    const xi = p[i][0], yi = p[i][1], xj = p[j][0], yj = p[j][1];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function distToSeg(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const l2 = dx * dx + dy * dy;
+  const t = l2 === 0 ? 0 : clamp(((px - ax) * dx + (py - ay) * dy) / l2, 0, 1);
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+function distToPolyline(px, py, line, closed) {
+  let d = Infinity;
+  const n = line.length;
+  for (let i = 0; i < (closed ? n : n - 1); i++) {
+    const a = line[i], b = line[(i + 1) % n];
+    d = Math.min(d, distToSeg(px, py, a[0], a[1], b[0], b[1]));
+  }
+  return d;
+}
+
+/* ---------- formatting ---------- */
+const fmt0 = (v) => Math.round(v).toLocaleString('en-US');
+const fmt1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+
+/* ---------- the example forest: geometry, stand histories, risk and priority rules ----------
+   Everything here is simulated. The rules are simple stand-ins for the AI models
+   the platform would run on lidar, imagery and inventory data. */
+'use strict';
+
+const YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const NOW = 2026;
+const DROUGHT = { 2019: 0.22, 2020: 0.3, 2021: 0.18, 2022: 0.72, 2023: 0.86, 2024: 0.44, 2025: 0.52, 2026: 0.61 };
+
+const RISK_CLASSES = [
+  { key: 'low', label: 'Low', min: 0, max: 40, color: '#0ca30c' },
+  { key: 'mod', label: 'Moderate', min: 40, max: 60, color: '#fab219' },
+  { key: 'high', label: 'High', min: 60, max: 75, color: '#ec835a' },
+  { key: 'vhigh', label: 'Very high', min: 75, max: 1e9, color: '#d03b3b' },
+];
+const riskClass = (v) => RISK_CLASSES.find((c) => v < c.max);
+
+const PRACTICES = {
+  thin: { label: 'Thinning', code: 'T', color: '#2a78d6' },
+  burn: { label: 'Prescribed burning', code: 'B', color: '#eb6834' },
+  fuel: { label: 'Fuel reduction', code: 'F', color: '#1baf7a' },
+  pest: { label: 'Pest control', code: 'P', color: '#eda100' },
+  salvage: { label: 'Salvage harvesting', code: 'S', color: '#e87ba4' },
+  none: { label: 'No treatment needed', code: '', color: '#d5d8d2' },
+};
+const PRACTICE_ORDER = ['thin', 'burn', 'fuel', 'pest', 'salvage'];
+
+const PRIORITY = {
+  urgent: { label: 'Urgent', rank: 3, color: '#d03b3b', when: 'Within 3 months' },
+  high: { label: 'High', rank: 2, color: '#ec835a', when: 'Within 12 months' },
+  mod: { label: 'Moderate', rank: 1, color: '#fab219', when: 'Within 24 months' },
+  low: { label: 'Monitor', rank: 0, color: '#d5d8d2', when: 'Review at next update' },
+};
+const PRIORITY_ORDER = ['urgent', 'high', 'mod', 'low'];
+
+/* Treatment calendar: 24 months starting December 2026. */
+const CAL_START = { y: 2026, m: 11 };
+const CAL_MONTHS = 24;
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function calLabel(i) {
+  const m = (CAL_START.m + i) % 12, y = CAL_START.y + Math.floor((CAL_START.m + i) / 12);
+  return { m, y, text: MONTH_ABBR[m] + ' ' + y };
+}
+const WINDOWS = {
+  salvage: { urgent: [0, 1] },
+  pest: { urgent: [0, 0] },
+  burn: { high: [0, 3], mod: [12, 15] },
+  thin: { high: [6, 10], mod: [18, 22] },
+  fuel: { high: [1, 3], mod: [9, 11] },
+};
+
+/* Map layers. Each sequential layer is a one-hue ramp, light to dark. */
+const LAYERS = [
+  { key: 'ba', group: 'Forest structure', name: 'Forest density', unit: 'ft²/ac', note: 'Basal area', domain: [0, 180], hue: 195, cmax: 0.105, dec: 0 },
+  { key: 'ht', group: 'Forest structure', name: 'Canopy height', unit: 'ft', note: 'Mean height of dominant trees', domain: [0, 95], hue: 147, cmax: 0.15, dec: 0 },
+  { key: 'cover', group: 'Forest structure', name: 'Canopy cover', unit: '%', note: 'Share of ground under tree crowns', domain: [0, 100], hue: 160, cmax: 0.12, dec: 0 },
+  { key: 'agb', group: 'Forest structure', name: 'Aboveground biomass', unit: 'tons/ac', note: 'Dry weight', domain: [0, 95], hue: 128, cmax: 0.14, dec: 0 },
+  { key: 'fuel', group: 'Forest structure', name: 'Fuel load', unit: 'tons/ac', note: 'Litter and understory', domain: [1, 11], hue: 78, cmax: 0.125, dec: 1 },
+  { key: 'stress', group: 'Forest health', name: 'Water stress', unit: 'index', note: '0 = none, 100 = severe', domain: [0, 100], hue: 62, cmax: 0.13, dec: 0 },
+  { key: 'pest', group: 'Forest health', name: 'Pest damage', unit: '% of trees', note: 'Crowns with bark beetle damage', domain: [0, 30], hue: 348, cmax: 0.16, dec: 1 },
+  { key: 'mort', group: 'Forest health', name: 'Tree mortality', unit: '% per year', note: 'Trees lost in the past 12 months', domain: [0, 30], hue: 28, cmax: 0.115, dec: 1 },
+  { key: 'wf', group: 'Risk', name: 'Wildfire risk', unit: 'index', note: '0 to 100', domain: [0, 100], hue: 40, cmax: 0.17, dec: 0, risk: true },
+  { key: 'dr', group: 'Risk', name: 'Drought risk', unit: 'index', note: '0 to 100', domain: [0, 100], hue: 82, cmax: 0.12, dec: 0, risk: true },
+  { key: 'pr', group: 'Risk', name: 'Pest risk', unit: 'index', note: '0 to 100', domain: [0, 100], hue: 318, cmax: 0.15, dec: 0, risk: true },
+  { key: 'comb', group: 'Risk', name: 'Combined risk class', unit: 'class', note: 'Class of the highest of the three risks', domain: [0, 100], dec: 0, risk: true, classed: true },
+];
+LAYERS.forEach((l) => { if (l.hue != null) l.ramp = makeRamp(l.hue, l.cmax); });
+const LAYER = Object.fromEntries(LAYERS.map((l) => [l.key, l]));
+
+/* Risk and condition values that follow from a stand's basic state. */
+function deriveState(b) {
+  const cover = b.age < 1 ? 4 : Math.min(96, Math.max(100 * (1 - Math.exp(-b.ba / 50)), Math.min(58, b.age * 9)));
+  const agb = 0.0075 * b.ba * b.ht;
+  const qmd = b.tpa > 0 && b.ba > 0 ? Math.sqrt(b.ba / (0.005454 * b.tpa)) : 0;
+  const stress = b.age < 1 ? 0 : 100 * clamp(b.dro * (0.32 + 0.48 * Math.min(1.3, b.ba / 140)) * (0.55 + 0.7 * b.soil) + (b.jitter || 0), 0, 1);
+  const low = b.ht < 28 ? 1 : b.ht < 45 ? 0.5 : 0.15;
+  const dn = norm(b.ba, 85, 150);
+  const parts = {
+    wf: b.age < 1 ? null : { 'Fuel load': 0.4 * norm(b.fuel, 2, 10.5), 'Understory (ladder fuels)': 0.26 * b.lad, 'Dry weather': 0.2 * b.dro, 'Low crowns': 0.1 * low },
+    dr: b.age < 1 ? null : { 'Stand density': 0.56 * dn, 'Sandy, fast-draining soil': 0.16 * b.soil, 'Dry weather': 0.2 * b.dro * (0.4 + 0.6 * dn), 'Young seedlings': b.age < 4 ? 0.2 : 0 },
+    pr: b.age < 1 ? null : {
+      'Stand density': 0.5 * norm(b.ba, 90, 150),
+      'Susceptible age': 0.08 * (b.age >= 12 && b.age <= 32 ? 1 : b.age >= 8 ? 0.5 : 0.1),
+      'Water stress': 0.2 * (stress / 100),
+      'Beetle activity nearby': 0.22 * (b.spotF || 0),
+    },
+  };
+  const sum = (o) => 100 * clamp(1.25 * Object.values(o).reduce((a, v) => a + v, 0) - 0.05, 0, 1);
+  const wf = parts.wf ? sum(parts.wf) : 14;
+  const dr = parts.dr ? sum(parts.dr) : 10;
+  const pr = parts.pr ? sum(parts.pr) : 5;
+  const mx = Math.max(wf, dr, pr);
+  return { cover, agb, qmd, stress, wf, dr, pr, comb: mx, parts };
+}
+
+function applyTreatment(b, practice, residual) {
+  const n = Object.assign({}, b);
+  if (practice === 'thin') {
+    const res = residual || 75;
+    if (n.ba > res) { n.tpa *= Math.pow(res / n.ba, 1.25); n.ba = res; }
+    n.fuel = Math.min(11, n.fuel + 1.2);
+  } else if (practice === 'burn') { n.fuel = 2.3; n.lad = 0.12; }
+  else if (practice === 'fuel') { n.fuel *= 0.72; n.lad = 0.15; }
+  else if (practice === 'pest') { n.spotF = 0.15; }
+  else if (practice === 'salvage') { n.ba *= 0.8; n.tpa *= 0.78; n.spotF = 0.1; n.fuel = Math.min(11, n.fuel + 1.0); }
+  return n;
+}
+
+const baMax = (si) => 186 * Math.pow(si / 68, 0.6);
+const baGrowth = (age, si) => 21 * Math.exp(-0.042 * age) * Math.pow(si / 68, 1.2);
+const heightAt = (age, si) => (age < 1 ? 0 : si * Math.pow((1 - Math.exp(-0.09 * age)) / (1 - Math.exp(-0.09 * 25)), 1.35));
+
+function projectBA(stand, nYears, residual) {
+  let b = stand.base[YEARS.length - 1];
+  let ba = b.ba, age = b.age;
+  const out = [{ year: NOW, ba }];
+  if (residual != null && ba > residual) { ba = residual; out.push({ year: NOW + 0.01, ba }); }
+  for (let k = 1; k <= nYears; k++) {
+    age += 1;
+    ba += baGrowth(age, stand.si) * Math.max(0, 1 - ba / baMax(stand.si));
+    ba *= ba / baMax(stand.si) > 0.62 ? 0.985 : 0.995;
+    out.push({ year: NOW + k, ba });
+  }
+  return out;
+}
+
+function buildForest() {
+  const rng = mulberry32(20261122);
+
+  /* --- property boundary: straight survey lines with a few jogs (metres, y = north) --- */
+  let B = [[150, 330], [1010, 215], [1010, 95], [1820, 70], [2420, 150], [2470, 880], [2290, 905], [2310, 1480], [1960, 1790], [1500, 1985], [760, 1950], [735, 1820], [240, 1760], [110, 1090]];
+  const k = Math.sqrt((1215 * M2_PER_ACRE) / Math.abs(polyArea(B)));
+  B = B.map((p) => [Math.round(p[0] * k), Math.round(p[1] * k)]);
+  const bx = B.map((p) => p[0]), by = B.map((p) => p[1]);
+  const fb = { x0: Math.min(...bx), y0: Math.min(...by), x1: Math.max(...bx), y1: Math.max(...by) };
+  const extent = { x0: fb.x0 - 330, y0: fb.y0 - 360, x1: fb.x1 + 330, y1: fb.y1 + 250 };
+  /* the basemap, creek and county road reach well past the tract so the map never shows an edge */
+  const view = { x0: fb.x0 - 1900, y0: fb.y0 - 1250, x1: fb.x1 + 1900, y1: fb.y1 + 1150 };
+
+  /* --- creek and county road (context features) --- */
+  const creek = [];
+  for (let i = -52; i <= 162; i++) {
+    const t = i / 110;
+    const x = lerp(extent.x0 - 60, extent.x1 + 60, t);
+    const y = lerp(fb.y0 + (fb.y1 - fb.y0) * 0.78, fb.y0 + (fb.y1 - fb.y0) * 0.24, t)
+      + 150 * Math.sin(t * Math.PI * 2 * 1.7 + 0.5) * (0.65 + 0.35 * Math.sin(t * 9))
+      + 130 * (fbm(t * 6, 3.3, 5, 3) - 0.5);
+    creek.push([x, y]);
+  }
+  const countyY = fb.y0 - 150;
+  const countyYAt = (x) => {
+    const t = (x - (extent.x0 - 60)) / (extent.x1 - extent.x0 + 120);
+    return countyY + 34 * Math.sin(t * 5.2 + 1) + 22 * Math.sin(t * 13);
+  };
+  const countyRoad = [];
+  for (let i = 0; i <= 150; i++) {
+    const x = lerp(view.x0 - 60, view.x1 + 60, i / 150);
+    countyRoad.push([x, countyYAt(x)]);
+  }
+  const SMZ = 34; // streamside management zone half-width, m
+  const elev = (x, y) => {
+    const d = distToPolyline(x, y, creek, false);
+    return 64 * fbm(x / 1500, y / 1500, 11, 5) - 15 * Math.exp(-(d * d) / (300 * 300)) + 0.006 * (y - fb.y0);
+  };
+
+  /* --- stand centres: scattered with a minimum spacing that varies across the tract --- */
+  const seeds = [];
+  const r0 = 236 * k;
+  let fails = 0;
+  while (fails < 6000 && seeds.length < 64) {
+    const x = lerp(fb.x0, fb.x1, rng()), y = lerp(fb.y0, fb.y1, rng());
+    if (!pointInPoly(x, y, B) || distToPolyline(x, y, B, true) < 125) { fails++; continue; }
+    const r = r0 * (0.74 + 0.6 * vnoise(x / 950, y / 950, 7));
+    let ok = true;
+    for (const s of seeds) if (Math.hypot(s[0] - x, s[1] - y) < r) { ok = false; break; }
+    if (ok) { seeds.push([x, y]); fails = 0; } else fails++;
+  }
+
+  /* --- Voronoi cells by half-plane clipping; E[k] = neighbour across the edge ending at V[k] --- */
+  const BIG = 900;
+  function cellOf(i) {
+    let V = [[extent.x0 - BIG, extent.y0 - BIG], [extent.x1 + BIG, extent.y0 - BIG], [extent.x1 + BIG, extent.y1 + BIG], [extent.x0 - BIG, extent.y1 + BIG]];
+    let E = [-1, -1, -1, -1];
+    const sx = seeds[i][0], sy = seeds[i][1];
+    for (let j = 0; j < seeds.length; j++) {
+      if (j === i) continue;
+      const tx = seeds[j][0], ty = seeds[j][1];
+      const mx = (sx + tx) / 2, my = (sy + ty) / 2, nx = tx - sx, ny = ty - sy;
+      const side = (p) => (p[0] - mx) * nx + (p[1] - my) * ny;
+      const NV = [], NE = [];
+      for (let a = 0; a < V.length; a++) {
+        const A = V[(a + V.length - 1) % V.length], P = V[a], tag = E[a];
+        const da = side(A), db = side(P);
+        if (da <= 0 && db <= 0) { NV.push(P); NE.push(tag); }
+        else if (da <= 0 && db > 0) { const t = da / (da - db); NV.push([A[0] + (P[0] - A[0]) * t, A[1] + (P[1] - A[1]) * t]); NE.push(tag); }
+        else if (da > 0 && db <= 0) {
+          const t = da / (da - db);
+          NV.push([A[0] + (P[0] - A[0]) * t, A[1] + (P[1] - A[1]) * t]); NE.push(j);
+          NV.push(P); NE.push(tag);
+        }
+      }
+      V = NV; E = NE;
+      if (V.length < 3) break;
+    }
+    return { V, E };
+  }
+
+  /* --- shared edges get the same gentle bends from both sides, so stands look surveyed, not computed --- */
+  const edgeCache = new Map();
+  function edgeLine(i, j, P, Q) {
+    const key = i < j ? i + '_' + j : j + '_' + i;
+    let e = edgeCache.get(key);
+    if (!e) {
+      const len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+      const pts = [P];
+      if (len > 90) {
+        const er = mulberry32(Math.min(i, j) * 7919 + Math.max(i, j) * 104729 + 13);
+        const ph1 = er() * 6.283, ph2 = er() * 6.283, a1 = (er() - 0.5) * 2, a2 = (er() - 0.5) * 2;
+        const amp = Math.min(30, len * 0.085);
+        const ux = (Q[0] - P[0]) / len, uy = (Q[1] - P[1]) / len;
+        const n = Math.max(2, Math.round(len / 55));
+        for (let s = 1; s < n; s++) {
+          const t = s / n, w = Math.sin(Math.PI * t);
+          const off = amp * w * (a1 * Math.sin(2 * Math.PI * t + ph1) * 0.7 + a2 * Math.sin(2 * Math.PI * t * 2.3 + ph2) * 0.45);
+          pts.push([P[0] + (Q[0] - P[0]) * t - uy * off, P[1] + (Q[1] - P[1]) * t + ux * off]);
+        }
+      }
+      pts.push(Q);
+      e = { key, i: Math.min(i, j), j: Math.max(i, j), pts, a: P, b: Q, len };
+      edgeCache.set(key, e);
+      return pts;
+    }
+    const dA = Math.hypot(P[0] - e.a[0], P[1] - e.a[1]), dB = Math.hypot(P[0] - e.b[0], P[1] - e.b[1]);
+    return dA <= dB ? e.pts : e.pts.slice().reverse();
+  }
+
+  let stands = seeds.map((s, i) => {
+    const { V, E } = cellOf(i);
+    const poly = [];
+    const nbrs = new Set();
+    for (let a = 0; a < V.length; a++) {
+      const A = V[(a + V.length - 1) % V.length], P = V[a], tag = E[a];
+      const pts = tag >= 0 ? edgeLine(i, tag, A, P) : [A, P];
+      if (tag >= 0 && pts.some((q) => pointInPoly(q[0], q[1], B))) nbrs.add(tag);
+      for (let q = 1; q < pts.length; q++) poly.push(pts[q]);
+    }
+    return { idx: i, seed: s, poly, nbrIdx: [...nbrs] };
+  });
+
+  /* --- stand area and label point from a sampling grid --- */
+  const STEP = 15;
+  stands.forEach((s) => { s._n = 0; s._sx = 0; s._sy = 0; s._pts = []; });
+  for (let y = fb.y0 + STEP / 2; y < fb.y1; y += STEP) {
+    for (let x = fb.x0 + STEP / 2; x < fb.x1; x += STEP) {
+      if (!pointInPoly(x, y, B)) continue;
+      let best = -1, bd = Infinity;
+      for (let i = 0; i < seeds.length; i++) {
+        const d = (seeds[i][0] - x) * (seeds[i][0] - x) + (seeds[i][1] - y) * (seeds[i][1] - y);
+        if (d < bd) { bd = d; best = i; }
+      }
+      let hit = pointInPoly(x, y, stands[best].poly) ? best : -1;
+      if (hit < 0) for (const j of stands[best].nbrIdx) if (pointInPoly(x, y, stands[j].poly)) { hit = j; break; }
+      if (hit < 0) hit = best;
+      const s = stands[hit];
+      s._n++; s._sx += x; s._sy += y;
+      if ((s._n & 3) === 0) s._pts.push([x, y]);
+    }
+  }
+  stands.forEach((s) => {
+    s.areaAc = (s._n * STEP * STEP) / M2_PER_ACRE;
+    let best = [s._sx / Math.max(1, s._n), s._sy / Math.max(1, s._n)], bd = -1;
+    for (const p of s._pts) {
+      const d = Math.min(distToPolyline(p[0], p[1], s.poly, true), distToPolyline(p[0], p[1], B, true));
+      if (d > bd) { bd = d; best = p; }
+    }
+    s.label = best; s.inradius = bd;
+    delete s._n; delete s._sx; delete s._sy; delete s._pts;
+  });
+
+  /* --- number stands roughly north to south, west to east --- */
+  const band = (fb.y1 - fb.y0) / 6;
+  const order = stands.slice().sort((a, b) => {
+    const ra = Math.floor((fb.y1 - a.label[1]) / band), rb = Math.floor((fb.y1 - b.label[1]) / band);
+    return ra !== rb ? ra - rb : a.label[0] - b.label[0];
+  });
+  order.forEach((s, n) => { s.id = n + 1; });
+  const byIdx = stands;
+  stands = order;
+  stands.forEach((s) => { s.nbrs = s.nbrIdx.map((j) => byIdx[j].id); });
+  const byId = (id) => stands[id - 1];
+
+  /* --- forest roads follow stand boundaries: shortest paths along shared edges --- */
+  const vkey = (p) => Math.round(p[0] / 2) + '_' + Math.round(p[1] / 2);
+  const graph = new Map();
+  const vpos = new Map();
+  for (const e of edgeCache.values()) {
+    const mid = e.pts[Math.floor(e.pts.length / 2)];
+    if (!pointInPoly(mid[0], mid[1], B)) continue;
+    const ka = vkey(e.a), kb = vkey(e.b);
+    vpos.set(ka, e.a); vpos.set(kb, e.b);
+    if (!graph.has(ka)) graph.set(ka, []);
+    if (!graph.has(kb)) graph.set(kb, []);
+    graph.get(ka).push({ to: kb, e, rev: false });
+    graph.get(kb).push({ to: ka, e, rev: true });
+  }
+  const nearestVertex = (x, y, insideOnly) => {
+    let best = null, bd = Infinity;
+    for (const [key, p] of vpos) {
+      if (insideOnly && !pointInPoly(p[0], p[1], B)) continue;
+      const d = Math.hypot(p[0] - x, p[1] - y);
+      if (d < bd) { bd = d; best = key; }
+    }
+    return best;
+  };
+  function shortestPath(from, to) {
+    const dist = new Map([[from, 0]]), prev = new Map(), done = new Set();
+    for (;;) {
+      let u = null, ud = Infinity;
+      for (const [key, d] of dist) if (!done.has(key) && d < ud) { ud = d; u = key; }
+      if (u == null || u === to) break;
+      done.add(u);
+      for (const link of graph.get(u) || []) {
+        const nd = ud + link.e.len;
+        if (nd < (dist.has(link.to) ? dist.get(link.to) : Infinity)) { dist.set(link.to, nd); prev.set(link.to, { from: u, link }); }
+      }
+    }
+    const line = [];
+    let cur = to;
+    if (!prev.has(cur)) return line;
+    const segs = [];
+    while (prev.has(cur)) { const p = prev.get(cur); segs.unshift(p.link); cur = p.from; }
+    segs.forEach((l, n) => {
+      const pts = l.rev ? l.e.pts.slice().reverse() : l.e.pts;
+      for (let q = n === 0 ? 0 : 1; q < pts.length; q++) line.push(pts[q]);
+    });
+    return line;
+  }
+  const roads = [];
+  const vS = nearestVertex(lerp(fb.x0, fb.x1, 0.56), fb.y0 + 60, true);
+  const vN = nearestVertex(lerp(fb.x0, fb.x1, 0.4), fb.y1 - 80, true);
+  const main = shortestPath(vS, vN);
+  if (main.length) {
+    const p0 = main[0];
+    const gate = [p0[0] + 26, countyYAt(p0[0] + 26)];
+    roads.push({ name: 'Main road', kind: 'main', line: [gate].concat(main) });
+    const mid = main[Math.floor(main.length * 0.52)];
+    const vM = nearestVertex(mid[0], mid[1], true);
+    const vE = nearestVertex(fb.x1 - 150, lerp(fb.y0, fb.y1, 0.62), true);
+    const spur = shortestPath(vM, vE);
+    if (spur.length > 2) roads.push({ name: 'East spur', kind: 'spur', line: spur });
+    const vW = nearestVertex(fb.x0 + 160, lerp(fb.y0, fb.y1, 0.42), true);
+    const mid2 = main[Math.floor(main.length * 0.3)];
+    const spur2 = shortestPath(nearestVertex(mid2[0], mid2[1], true), vW);
+    if (spur2.length > 2) roads.push({ name: 'West spur', kind: 'spur', line: spur2 });
+  }
+
+  /* --- stand histories --- */
+  stands.forEach((s) => {
+    const r = mulberry32(1000 + s.id * 7919);
+    const u = r();
+    const age = u < 0.13 ? 2 + Math.floor(r() * 5) : u < 0.7 ? 9 + Math.floor(r() * 14) : 23 + Math.floor(r() * 11);
+    s.planted = NOW - age;
+    const lx = s.label[0], ly = s.label[1];
+    s.si = Math.round(clamp(67 + 4.5 * randn(r) + 9 * (fbm(lx / 1500, ly / 1500, 31, 3) - 0.5), 56, 80));
+    s.tpa0 = Math.round(560 + 160 * r());
+    s.surv0 = 0.86 + 0.09 * r();
+    s.soil = clamp(0.12 + 0.82 * fbm(lx / 1300, ly / 1300, 91, 3) + 0.08 * randn(r), 0.05, 0.97);
+    s.r1 = r(); s.r2 = r(); s.jit = (r() - 0.5) * 0.08;
+    s.thin1Age = r() < 0.5 ? 13 + Math.floor(r() * 5) : -1;
+    s.res1 = 68 + Math.round(r() * 14);
+    s.thin2Age = s.thin1Age > 0 && r() < 0.55 ? s.thin1Age + 8 + Math.floor(r() * 3) : -1;
+    s.res2 = 72 + Math.round(r() * 16);
+    s.burnInt = r() < 0.48 ? 3 + Math.floor(r() * 3) : 0;
+    s.burnStart = 8 + Math.floor(r() * 4);
+    s.rowAngle = r() * Math.PI;
+    s.spot = null;
+    const sp = mulberry32(555 + s.id * 31);
+    s.spotAt = s.label;
+    s.spotSeed = Math.floor(sp() * 1e6);
+  });
+
+  function simulate(s) {
+    s.base = []; s.lastThin = null; s.lastBurn = null; s.events = [];
+    let ba = 0, tpa = 0, lastBurn = null, lastThin = null;
+    const bmax = baMax(s.si);
+    const first = Math.min(s.planted, YEARS[0]);
+    for (let y = first; y <= NOW; y++) {
+      const age = y - s.planted;
+      const dro = DROUGHT[y] != null ? DROUGHT[y] : 0.35;
+      let pest = 0, mort = 0, fuel = 3.4, lad = 0.2, ht = 0;
+      if (age === 0) s.events.push({ y, text: 'Planted' });
+      if (age >= 0) {
+        if (age === 1) tpa = s.tpa0 * s.surv0;
+        if (age >= 3) ba += baGrowth(age, s.si) * Math.max(0, 1 - ba / bmax);
+        else if (age >= 1) ba += 1.1 * age;
+        mort = 0.9 + 0.6 * s.r1;
+        if (ba / bmax > 0.62) mort += (3.2 * (ba / bmax - 0.62)) / 0.38;
+        if (dro > 0.6) mort += (dro - 0.6) * 6 * (0.4 + 0.6 * Math.min(1.2, ba / 140)) * (0.5 + s.soil);
+        if (age === s.thin1Age || age === s.thin2Age) {
+          const res = age === s.thin1Age ? s.res1 : s.res2;
+          if (ba > res + 12) { tpa *= Math.pow(res / ba, 1.25); ba = res; lastThin = y; s.events.push({ y, text: 'Thinned to ' + res + ' ft²/ac' }); }
+        }
+        if (s.burnInt > 0 && age >= s.burnStart && (age - s.burnStart) % s.burnInt === 0) { lastBurn = y; s.events.push({ y, text: 'Prescribed burn' }); }
+        pest = 0.2 + 0.5 * s.r2 * (dro > 0.6 ? 2 : 1);
+        if (s.spot && y >= s.spot.start) {
+          let dmg = s.spot.d0 * Math.pow(s.spot.grow, y - s.spot.start);
+          if (y === s.spot.start) s.events.push({ y, text: 'Bark beetle spot detected' });
+          if (s.spot.controlled != null && y >= s.spot.controlled) {
+            if (y === s.spot.controlled) s.events.push({ y, text: 'Beetle spot cut and removed' });
+            dmg = y === s.spot.controlled ? dmg * 0.3 : 0.8;
+          }
+          dmg = Math.min(dmg, 34);
+          pest += dmg; mort += dmg * 0.75;
+        }
+        mort = Math.min(mort, 45);
+        if (age >= 1) { tpa *= 1 - mort / 100; ba *= 1 - (0.7 * mort) / 100 * (mort > 3 ? 1 : 0.3); }
+        ht = heightAt(age, s.si);
+        const ysb = y - (lastBurn != null ? lastBurn : s.planted);
+        const cov = age < 1 ? 4 : Math.min(96, Math.max(100 * (1 - Math.exp(-ba / 50)), Math.min(58, age * 9)));
+        fuel = 1.4 + 6.6 * (1 - Math.exp(-0.22 * ysb)) + 1.8 * (1 - cov / 100) * Math.min(1, ysb / 5);
+        if (lastThin != null) fuel += y - lastThin <= 1 ? 2.2 : y - lastThin === 2 ? 1.0 : 0;
+        fuel = Math.min(11, fuel);
+        lad = clamp(Math.min(1, ysb / 8) * (0.5 + 0.5 * (1 - cov / 100)) + (age < 8 ? 0.15 : 0), 0, 1);
+      }
+      if (y >= YEARS[0]) {
+        s.base.push({
+          year: y, age, ba, tpa, ht, fuel, lad, soil: s.soil, dro, spotF: 0, jitter: s.jit, pest: age >= 1 ? pest : 0, mort: age >= 1 ? mort : 0,
+          ysb: Math.max(0, y - (lastBurn != null ? lastBurn : s.planted)), lastThin, lastBurn,
+        });
+      }
+    }
+    s.lastThin = lastThin; s.lastBurn = lastBurn;
+  }
+  stands.forEach(simulate);
+
+  /* --- bark beetle spots start in dense, unthinned stands after the dry years --- */
+  const i23 = YEARS.indexOf(2023);
+  const cand = stands
+    .filter((s) => { const b = s.base[i23]; return b.age >= 12 && b.age <= 28 && b.ba >= 118 && (b.lastThin == null || 2023 - b.lastThin > 8); })
+    .sort((a, b) => b.base[i23].ba - a.base[i23].ba);
+  const plans = [
+    { start: 2023, d0: 5, grow: 1.9, controlled: 2025 },
+    { start: 2024, d0: 4, grow: 2.1, controlled: null },
+    { start: 2025, d0: 3.6, grow: 2.0, controlled: null },
+    { start: 2026, d0: 3.4, grow: 2.0, controlled: null },
+  ];
+  const chosen = [];
+  for (const c of cand) {
+    if (chosen.length >= plans.length) break;
+    if (chosen.some((o) => Math.hypot(o.label[0] - c.label[0], o.label[1] - c.label[1]) < 620 || o.nbrs.includes(c.id))) continue;
+    c.spot = Object.assign({}, plans[chosen.length]);
+    chosen.push(c);
+  }
+  chosen.forEach(simulate);
+
+  /* --- neighbour effect on pest risk, then derived values for every year --- */
+  const KEYS = ['ba', 'tpa', 'ht', 'fuel', 'lad', 'pest', 'mort', 'cover', 'agb', 'qmd', 'stress', 'wf', 'dr', 'pr', 'comb', 'age', 'ysb'];
+  const active = (s, i) => s.spot && s.base[i].year >= s.spot.start && (s.spot.controlled == null || s.base[i].year < s.spot.controlled) && s.base[i].pest >= 3;
+  stands.forEach((s) => {
+    s.ts = {}; KEYS.forEach((key) => { s.ts[key] = []; });
+    s.derived = [];
+    YEARS.forEach((y, i) => {
+      const b = s.base[i];
+      b.spotF = active(s, i) ? 1 : s.nbrs.some((id) => active(byId(id), i)) ? 0.55 : 0;
+      const d = deriveState(b);
+      s.derived.push(d);
+      KEYS.forEach((key) => { s.ts[key].push(key in d ? d[key] : b[key]); });
+    });
+  });
+
+  /* --- what to do, how urgently, and when --- */
+  const last = YEARS.length - 1;
+  stands.forEach((s) => {
+    const b = s.base[last], d = s.derived[last];
+    const thinAgo = s.lastThin ? NOW - s.lastThin : 99;
+    let practice = 'none', cls = 'low', why = '';
+    if (s.spot && s.spot.controlled == null && b.pest >= 14) {
+      practice = 'salvage'; cls = 'urgent';
+      why = 'An active bark beetle spot has damaged ' + fmt0(b.pest) + '% of trees. Salvage the infested area and a buffer before the spot spreads.';
+    } else if (s.spot && s.spot.controlled == null && b.pest >= 3) {
+      practice = 'pest'; cls = 'urgent';
+      why = 'A new bark beetle spot covers about ' + fmt0(b.pest) + '% of trees. Cut and remove the infested trees while the spot is small.';
+    } else if (b.ba >= 118 && b.age >= 11 && thinAgo >= 5) {
+      practice = 'thin'; cls = d.pr >= 75 || d.dr >= 75 ? 'high' : 'mod';
+      why = 'Basal area is ' + fmt0(b.ba) + ' ft²/ac, above the level where trees compete for water and beetle hazard rises. Thinning lowers both drought and pest risk.';
+    } else if (d.wf >= 60 && b.age >= 10 && b.ht >= 35) {
+      practice = 'burn'; cls = d.wf >= 75 ? 'high' : 'mod';
+      why = 'Fuel load is ' + fmt1(b.fuel) + ' tons/ac after ' + b.ysb + ' years without fire. A dormant-season burn removes litter and understory.';
+    } else if (d.wf >= 60 && b.age >= 1) {
+      practice = 'fuel'; cls = d.wf >= 75 ? 'high' : 'mod';
+      why = 'Dense understory connects the ground to low crowns, and the trees are too young to burn under. Mulching or herbicide breaks up the fuel.';
+    } else {
+      why = b.age < 1 ? 'Harvested and waiting to be replanted.' : 'Density, fuels and health are within target ranges. Keep monitoring.';
+    }
+    const win = practice === 'none' ? null : WINDOWS[practice][cls] || WINDOWS[practice][Object.keys(WINDOWS[practice])[0]];
+    s.rec = {
+      practice, cls, why, window: win,
+      whenText: win ? (win[0] === win[1] ? calLabel(win[0]).text : calLabel(win[0]).text + ' to ' + calLabel(win[1]).text) : PRIORITY.low.when,
+      score: PRIORITY[cls].rank * 100 + d.comb,
+    };
+    const after = practice === 'none' ? d : deriveState(applyTreatment(b, practice, s.res1));
+    s.rec.after = after;
+  });
+  const ranked = stands.filter((s) => s.rec.practice !== 'none').sort((a, b) => b.rec.score - a.rec.score);
+  ranked.forEach((s, n) => { s.rec.rank = n + 1; });
+
+  /* --- forest-wide summaries --- */
+  const totalAc = stands.reduce((a, s) => a + s.areaAc, 0);
+  const mean = (key, i) => stands.reduce((a, s) => a + s.ts[key][i] * s.areaAc, 0) / totalAc;
+  const summary = YEARS.map((y, i) => {
+    const byClass = { low: 0, mod: 0, high: 0, vhigh: 0 };
+    stands.forEach((s) => { byClass[riskClass(s.ts.comb[i]).key] += s.areaAc; });
+    return { year: y, byClass, mean: Object.fromEntries(KEYS.map((key) => [key, mean(key, i)])) };
+  });
+
+  return { boundary: B, extent, view, fb, stands, byId, roads, creek, countyRoad, SMZ, elev, totalAc, summary, ranked, chosenSpots: chosen.map((s) => s.id) };
+}
+
+
+/* ---------- stand map on Canvas 2D ---------- */
+'use strict';
+
+/* Hillshade and fine texture for the whole map extent, computed once. */
+function forestRasters(F) {
+  if (F._rasters) return F._rasters;
+  const mk = (W, ext) => {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = Math.round((W * (ext.y1 - ext.y0)) / (ext.x1 - ext.x0));
+    return c;
+  };
+  let ext = F.view;
+  const shade = mk(340, ext);
+  {
+    const W = shade.width, H = shade.height, cell = (ext.x1 - ext.x0) / W;
+    const z = new Float32Array(W * H);
+    for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) z[py * W + px] = F.elev(ext.x0 + (px + 0.5) * cell, ext.y1 - (py + 0.5) * cell);
+    const g = shade.getContext('2d'), img = g.createImageData(W, H);
+    for (let py = 0; py < H; py++) {
+      for (let px = 0; px < W; px++) {
+        const xl = z[py * W + Math.max(0, px - 1)], xr = z[py * W + Math.min(W - 1, px + 1)];
+        const yn = z[Math.max(0, py - 1) * W + px], ys = z[Math.min(H - 1, py + 1) * W + px];
+        const dzdx = ((xr - xl) / (2 * cell)) * 11, dzdy = ((yn - ys) / (2 * cell)) * 11;
+        const nl = (0.5 * dzdx - 0.5 * dzdy + 0.7071) / Math.sqrt(dzdx * dzdx + dzdy * dzdy + 1);
+        const v = Math.round(255 * clamp(0.35 + 0.92 * nl, 0.55, 1));
+        const o = (py * W + px) * 4;
+        img.data[o] = img.data[o + 1] = img.data[o + 2] = v; img.data[o + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+  }
+  ext = F.extent;
+  const tex = mk(620, ext);
+  {
+    const W = tex.width, H = tex.height, cell = (ext.x1 - ext.x0) / W;
+    const g = tex.getContext('2d'), img = g.createImageData(W, H);
+    for (let py = 0; py < H; py++) {
+      for (let px = 0; px < W; px++) {
+        const x = ext.x0 + (px + 0.5) * cell, y = ext.y1 - (py + 0.5) * cell;
+        const n = 0.55 * fbm(x / 70, y / 70, 3, 3) + 0.45 * hash2(px, py, 77);
+        const v = Math.round(255 - 70 * n);
+        const o = (py * W + px) * 4;
+        img.data[o] = img.data[o + 1] = img.data[o + 2] = v; img.data[o + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+  }
+  F._rasters = { shade, tex };
+  return F._rasters;
+}
+
+function forestPaths(F) {
+  if (F._paths) return F._paths;
+  const line = (pts, close) => {
+    const p = new Path2D();
+    pts.forEach((q, i) => (i ? p.lineTo(q[0], q[1]) : p.moveTo(q[0], q[1])));
+    if (close) p.closePath();
+    return p;
+  };
+  F.stands.forEach((s) => {
+    s.path = line(s.poly, true);
+    const r = mulberry32(s.spotSeed);
+    const a = r() * Math.PI * 2, d = s.inradius * 0.5;
+    s.spotPos = [s.label[0] + Math.cos(a) * d, s.label[1] + Math.sin(a) * d];
+  });
+  F.roads.forEach((r) => { r.path = line(r.line, false); });
+  F._paths = { boundary: line(F.boundary, true), creek: line(F.creek, false), county: line(F.countyRoad, false) };
+  return F._paths;
+}
+
+class StandMap {
+  constructor(el, F, opts) {
+    this.el = el; this.F = F;
+    this.o = Object.assign({ mode: 'layer', layer: 'comb', year: NOW, labels: true, controls: true, zoom: true, label: 'Map of the example forest' }, opts || {});
+    this.mode = this.o.mode; this.layer = this.o.layer; this.yi = YEARS.indexOf(this.o.year);
+    this.selected = null; this.hover = null; this.filter = null; this.marked = null;
+    this.h = {}; this.W = 0; this.H = 0; this.view = null; this.s0 = 1; this._raf = 0;
+    el.classList.add('map');
+    this.canvas = document.createElement('canvas');
+    this.canvas.setAttribute('role', 'img');
+    this.canvas.setAttribute('aria-label', this.o.label);
+    el.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext('2d');
+    this.R = forestRasters(F);
+    this.P = forestPaths(F);
+    this._chrome();
+    this._bind();
+    new ResizeObserver(() => this.resize()).observe(el);
+    this.resize();
+  }
+  on(evt, fn) { (this.h[evt] = this.h[evt] || []).push(fn); return this; }
+  emit(evt, a, b) { (this.h[evt] || []).forEach((fn) => fn(a, b)); }
+
+  _chrome() {
+    const el = this.el;
+    const north = document.createElement('div');
+    north.className = 'map__north';
+    north.innerHTML = '<svg viewBox="0 0 30 40" width="30" height="40" aria-hidden="true"><path d="M15 3 L23 27 L15 22 L7 27 Z" fill="#1b1b1b" stroke="#fff" stroke-width="1.2"/><text x="15" y="39" text-anchor="middle" font-size="11" font-weight="700" fill="#1b1b1b" stroke="#fff" stroke-width="2.4" paint-order="stroke">N</text></svg>';
+    el.appendChild(north);
+    this.scaleEl = document.createElement('div');
+    this.scaleEl.className = 'map__scale';
+    el.appendChild(this.scaleEl);
+    this.stampEl = document.createElement('div');
+    this.stampEl.className = 'map__stamp';
+    this.stampEl.hidden = true;
+    el.appendChild(this.stampEl);
+    if (this.o.controls && this.o.zoom) {
+      const c = document.createElement('div');
+      c.className = 'map__ctrl';
+      c.innerHTML = '<button type="button" data-z="in" aria-label="Zoom in" title="Zoom in">+</button><button type="button" data-z="out" aria-label="Zoom out" title="Zoom out">&minus;</button><button type="button" data-z="fit" aria-label="Show whole forest" title="Show whole forest">&#9633;</button>';
+      c.addEventListener('click', (e) => {
+        const z = e.target.getAttribute('data-z');
+        if (z === 'in') this.zoomAt(1.5, this.W / 2, this.H / 2);
+        else if (z === 'out') this.zoomAt(1 / 1.5, this.W / 2, this.H / 2);
+        else if (z === 'fit') { this.fit(); this.invalidate(); }
+      });
+      el.appendChild(c);
+    }
+  }
+  setStamp(text) { this.stampEl.hidden = !text; this.stampEl.textContent = text || ''; }
+
+  resize() {
+    const W = this.el.clientWidth, H = this.el.clientHeight;
+    if (!W || !H) return;
+    const first = !this.view || !this.W;
+    const rel = first ? null : { cx: this.view.cx, cy: this.view.cy, z: this.view.s / this.s0 };
+    this.W = W; this.H = H; this.dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.canvas.width = Math.round(W * this.dpr); this.canvas.height = Math.round(H * this.dpr);
+    this.fit();
+    if (rel && rel.z > 1.01) { this.view.cx = rel.cx; this.view.cy = rel.cy; this.view.s = this.s0 * rel.z; this._clamp(); }
+    this.draw();
+  }
+  fit() {
+    const fb = this.F.fb;
+    const padX = 190, padTop = 120, padBottom = 290;
+    const s = Math.min(this.W / (fb.x1 - fb.x0 + 2 * padX), this.H / (fb.y1 - fb.y0 + padTop + padBottom));
+    this.s0 = s;
+    this.view = { cx: (fb.x0 + fb.x1) / 2, cy: (fb.y0 + fb.y1) / 2 + (padTop - padBottom) / 2, s };
+  }
+  _clamp() {
+    const v = this.view, ext = this.F.extent;
+    v.s = clamp(v.s, this.s0, this.s0 * 9);
+    const hw = this.W / 2 / v.s, hh = this.H / 2 / v.s;
+    const mx = 60, my = 60;
+    v.cx = ext.x1 - ext.x0 + 2 * mx <= 2 * hw ? (ext.x0 + ext.x1) / 2 : clamp(v.cx, ext.x0 - mx + hw, ext.x1 + mx - hw);
+    v.cy = ext.y1 - ext.y0 + 2 * my <= 2 * hh ? this.view.cy : clamp(v.cy, ext.y0 - my + hh, ext.y1 + my - hh);
+  }
+  toWorld(px, py) { const v = this.view; return [(px - this.W / 2) / v.s + v.cx, (this.H / 2 - py) / v.s + v.cy]; }
+  toScreen(x, y) { const v = this.view; return [(x - v.cx) * v.s + this.W / 2, this.H / 2 - (y - v.cy) * v.s]; }
+  zoomAt(f, px, py) {
+    if (!this.o.zoom) return;
+    const w = this.toWorld(px, py), v = this.view;
+    const ns = clamp(v.s * f, this.s0, this.s0 * 9);
+    v.cx = w[0] - (px - this.W / 2) / ns; v.cy = w[1] + (py - this.H / 2) / ns; v.s = ns;
+    if (ns <= this.s0 * 1.001) this.fit(); else this._clamp();
+    this.invalidate();
+  }
+  hit(px, py) {
+    const w = this.toWorld(px, py);
+    if (!pointInPoly(w[0], w[1], this.F.boundary)) return null;
+    for (const s of this.F.stands) if (pointInPoly(w[0], w[1], s.poly)) return s;
+    return null;
+  }
+  select(id, user) { this.selected = id; this.invalidate(); if (user) this.emit('select', id == null ? null : this.F.byId(id)); }
+  set(props) { Object.assign(this, props); if (props.year != null) this.yi = YEARS.indexOf(props.year); this.invalidate(); }
+  invalidate() { if (this._raf) return; this._raf = requestAnimationFrame(() => { this._raf = 0; this.draw(); }); }
+
+  colorOf(st) {
+    if (this.mode === 'priority') return PRIORITY[st.rec.cls].color;
+    if (st.ts.age[this.yi] < 0) return '#c9cdc5';
+    const L = LAYER[this.layer], v = st.ts[this.layer][this.yi];
+    if (L.classed) return riskClass(v).color;
+    return L.ramp.css(norm(v, L.domain[0], L.domain[1]));
+  }
+
+  _bind() {
+    const el = this.el;
+    const pts = new Map();
+    let down = null, moved = false, pinch = null;
+    const local = (e) => { const r = el.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    el.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.map__ctrl')) return;
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      if (pts.size === 2 && this.o.zoom) {
+        const [a, b] = [...pts.values()];
+        pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), s: this.view.s };
+        down = null;
+      } else if (pts.size === 1) {
+        down = { x: e.clientX, y: e.clientY, cx: this.view.cx, cy: this.view.cy };
+        moved = false;
+      }
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (pinch && pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        const r = el.getBoundingClientRect();
+        const f = (pinch.s * (Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d)) / this.view.s;
+        this.zoomAt(f, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+        return;
+      }
+      if (down) {
+        const dx = e.clientX - down.x, dy = e.clientY - down.y;
+        if (!moved && Math.hypot(dx, dy) > 4) { moved = true; if (this.o.zoom) el.classList.add('is-drag'); this.emit('hover', null, e); }
+        if (moved && this.o.zoom && this.view.s > this.s0 * 1.001) {
+          this.view.cx = down.cx - dx / this.view.s; this.view.cy = down.cy + dy / this.view.s;
+          this._clamp(); this.invalidate();
+        }
+        return;
+      }
+      const p = local(e);
+      const st = this.hit(p[0], p[1]);
+      if (st !== this.hover) { this.hover = st; this.invalidate(); }
+      this.emit('hover', st, e);
+    });
+    const up = (e) => {
+      pts.delete(e.pointerId);
+      if (pts.size < 2) pinch = null;
+      if (!down) return;
+      el.classList.remove('is-drag');
+      const wasMoved = moved; down = null;
+      if (!wasMoved && e.type === 'pointerup') {
+        const p = local(e);
+        const st = this.hit(p[0], p[1]);
+        if (st) this.select(st.id, true);
+      }
+    };
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('pointerleave', (e) => {
+      if (down) return;
+      if (this.hover) { this.hover = null; this.invalidate(); }
+      this.emit('hover', null, e);
+    });
+    if (this.o.zoom) {
+      el.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const p = local(e);
+        this.zoomAt(Math.exp(-e.deltaY * 0.0016), p[0], p[1]);
+      }, { passive: false });
+      el.addEventListener('dblclick', (e) => {
+        if (e.target.closest('.map__ctrl')) return;
+        const p = local(e);
+        this.zoomAt(1.7, p[0], p[1]);
+      });
+    }
+  }
+
+  draw() {
+    const { ctx, F, P } = this, W = this.W, H = this.H, dpr = this.dpr;
+    if (!W || !H) return;
+    const s = this.view.s, tx = W / 2 - this.view.cx * s, ty = H / 2 + this.view.cy * s;
+    const scr = () => ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const wld = () => ctx.setTransform(dpr * s, 0, 0, -dpr * s, dpr * tx, dpr * ty);
+    const ext = F.extent, vw = F.view;
+    const ex = ext.x0 * s + tx, ey = ty - ext.y1 * s, ew = (ext.x1 - ext.x0) * s, eh = (ext.y1 - ext.y0) * s;
+    const vx = vw.x0 * s + tx, vy = ty - vw.y1 * s, vwid = (vw.x1 - vw.x0) * s, vhei = (vw.y1 - vw.y0) * s;
+    const yi = this.yi;
+
+    scr();
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#e6eadf'; ctx.fillRect(0, 0, W, H);
+    ctx.imageSmoothingEnabled = true;
+    ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = 0.6;
+    ctx.drawImage(this.R.shade, vx, vy, vwid, vhei);
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+
+    wld();
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#86aecb'; ctx.lineWidth = 2 / s; ctx.stroke(P.creek);
+    ctx.strokeStyle = '#8a8f96'; ctx.lineWidth = 5.4 / s; ctx.stroke(P.county);
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3.2 / s; ctx.stroke(P.county);
+
+    ctx.save();
+    ctx.clip(P.boundary);
+    for (const st of F.stands) { ctx.fillStyle = this.colorOf(st); ctx.fill(st.path); }
+    scr();
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.imageSmoothingEnabled = s / this.s0 < 2.4;
+    ctx.globalAlpha = this.mode === 'priority' ? 0.3 : 0.5;
+    ctx.drawImage(this.R.tex, ex, ey, ew, eh);
+    ctx.imageSmoothingEnabled = true; ctx.globalAlpha = 0.75;
+    ctx.drawImage(this.R.shade, vx, vy, vwid, vhei);
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    wld();
+    if (this.filter) {
+      ctx.fillStyle = 'rgba(255,255,255,0.78)';
+      for (const st of F.stands) if (!this.filter(st)) ctx.fill(st.path);
+    }
+    /* active bark beetle spots */
+    for (const st of F.stands) {
+      const b = st.base[yi];
+      const on = st.spot && b.year >= st.spot.start && b.pest >= 2.5;
+      if (!on) continue;
+      const r = mulberry32(st.spotSeed + 5);
+      const rad = 26 + b.pest * 3.4, n = Math.round(10 + b.pest * 3.2);
+      ctx.fillStyle = 'rgba(92,20,20,0.9)';
+      const dot = Math.max(5.5, 1.5 / s);
+      ctx.beginPath();
+      for (let k = 0; k < n; k++) {
+        const a = r() * 6.283, d = rad * Math.sqrt(r());
+        const x = st.spotPos[0] + Math.cos(a) * d, y = st.spotPos[1] + Math.sin(a) * d;
+        ctx.moveTo(x + dot, y); ctx.arc(x, y, dot, 0, 6.283);
+      }
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(92,20,20,0.95)'; ctx.lineWidth = 1.6 / s;
+      ctx.setLineDash([6 / s, 4 / s]);
+      ctx.beginPath(); ctx.arc(st.spotPos[0], st.spotPos[1], rad + 12, 0, 6.283); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.strokeStyle = 'rgba(112,140,108,0.94)'; ctx.lineWidth = F.SMZ * 2; ctx.stroke(P.creek);
+    ctx.strokeStyle = '#4f86b8'; ctx.lineWidth = 2.2 / s; ctx.stroke(P.creek);
+    ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 1.2 / s;
+    for (const st of F.stands) ctx.stroke(st.path);
+    if (this.marked) {
+      ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3 / s;
+      for (const st of F.stands) if (this.marked.has(st.id)) ctx.stroke(st.path);
+    }
+    const hov = this.hover && this.hover.id !== this.selected ? this.hover : null;
+    if (hov) { ctx.strokeStyle = 'rgba(27,27,27,0.85)'; ctx.lineWidth = 2.4 / s; ctx.stroke(hov.path); }
+    if (this.selected != null) {
+      const st = F.byId(this.selected);
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 7 / s; ctx.stroke(st.path);
+      ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3.4 / s; ctx.stroke(st.path);
+    }
+    ctx.restore();
+
+    wld();
+    for (const r of F.roads) { ctx.strokeStyle = '#3f3325'; ctx.lineWidth = (r.kind === 'main' ? 5.6 : 4) / s; ctx.stroke(r.path); }
+    for (const r of F.roads) { ctx.strokeStyle = '#fbf3df'; ctx.lineWidth = (r.kind === 'main' ? 3.2 : 2) / s; ctx.stroke(r.path); }
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 5.5 / s; ctx.stroke(P.boundary);
+    ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2.2 / s; ctx.stroke(P.boundary);
+
+    /* labels in screen space */
+    scr();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    if (this.o.labels) {
+      for (const st of F.stands) {
+        if (st.inradius * s < 12) continue;
+        const p = this.toScreen(st.label[0], st.label[1]);
+        if (p[0] < -20 || p[0] > W + 20 || p[1] < -20 || p[1] > H + 20) continue;
+        const dim = this.filter && !this.filter(st);
+        const pr = this.mode === 'priority' && st.rec.practice !== 'none' ? PRACTICES[st.rec.practice] : null;
+        const txt = String(st.id);
+        ctx.font = '700 12px "Public Sans", system-ui, sans-serif';
+        const tw = ctx.measureText(txt).width;
+        const total = tw + (pr ? 21 : 0);
+        let x = p[0] - total / 2;
+        ctx.globalAlpha = dim ? 0.45 : 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 3.2; ctx.fillStyle = '#1b1b1b';
+        ctx.strokeText(txt, x + tw / 2, p[1] + 0.5); ctx.fillText(txt, x + tw / 2, p[1] + 0.5);
+        if (pr) {
+          x += tw + 4;
+          ctx.fillStyle = pr.color; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.rect(x, p[1] - 8.5, 17, 17); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = st.rec.practice === 'pest' || st.rec.practice === 'salvage' || st.rec.practice === 'fuel' ? '#1b1b1b' : '#ffffff';
+          ctx.font = '700 11.5px "Public Sans", system-ui, sans-serif';
+          ctx.fillText(pr.code, x + 8.5, p[1] + 0.5);
+        }
+        ctx.globalAlpha = 1;
+      }
+      const cr = this.F.countyRoad.find((q) => q[0] >= ext.x0 + 420);
+      const c0 = this.toScreen(cr[0], cr[1]);
+      if (c0[1] < H - 8 && c0[1] > 8) {
+        ctx.font = '600 11px "Public Sans", system-ui, sans-serif';
+        ctx.strokeStyle = 'rgba(230,234,223,0.95)'; ctx.lineWidth = 3; ctx.fillStyle = '#3d4551';
+        ctx.strokeText('County road', Math.max(60, c0[0]), c0[1] - 11); ctx.fillText('County road', Math.max(60, c0[0]), c0[1] - 11);
+      }
+    }
+
+    /* scale bar */
+    const opts = [250, 500, 1000, 2000, 2640, 5280, 10560];
+    let ft = opts[0];
+    for (const o of opts) { if ((o / M2FT) * s <= 130) ft = o; }
+    this.scaleEl.innerHTML = (ft >= 2640 ? ft / 5280 + ' mi' : fmt0(ft) + ' ft') + '<i style="width:' + ((ft / M2FT) * s).toFixed(0) + 'px"></i>';
+  }
+}
+
+/* Legend markup for a map state. */
+function legendHTML(mode, layerKey, F, yi) {
+  if (mode === 'priority') {
+    return '<span class="legend__title">Priority</span>' +
+      PRIORITY_ORDER.map((k) => `<span class="chip"><i style="background:${PRIORITY[k].color}"></i>${PRIORITY[k].label} <span class="note">(${PRIORITY[k].when.toLowerCase()})</span></span>`).join('') +
+      '<span class="legend__title" style="margin-left:8px">Practice</span>' +
+      PRACTICE_ORDER.map((k) => `<span class="chip"><span class="code${k === 'pest' || k === 'salvage' || k === 'fuel' ? ' code--dark' : ''}" style="background:${PRACTICES[k].color}">${PRACTICES[k].code}</span>${PRACTICES[k].label}</span>`).join('');
+  }
+  const L = LAYER[layerKey];
+  let h = `<span class="legend__title">${L.name}${L.classed ? '' : ' (' + L.unit + ')'}</span>`;
+  if (L.classed) {
+    h += RISK_CLASSES.map((c) => `<span class="chip"><i style="background:${c.color}"></i>${c.label} <span class="note">(${c.min}${c.max > 100 ? '+' : ' to ' + c.max})</span></span>`).join('');
+  } else {
+    const [a, b] = L.domain;
+    const ticks = L.risk ? [0, 40, 60, 75, 100] : [0, 0.25, 0.5, 0.75, 1].map((t) => a + (b - a) * t);
+    h += `<span class="legend__ramp"><div class="legend__bar" style="background:${L.ramp.gradient()}"></div><div class="legend__ticks">` +
+      ticks.map((t) => `<span style="left:${(((t - a) / (b - a)) * 100).toFixed(1)}%">${L.dec ? fmt1(t) : fmt0(t)}</span>`).join('') + '</div></span>';
+    if (L.risk) h += '<span class="note">Low under 40, moderate 40 to 60, high 60 to 75, very high 75 and above</span>';
+  }
+  if (F && F.stands.some((s) => s.ts.age[yi] < 0)) h += '<span class="chip"><i style="background:#c9cdc5"></i>Not yet planted</span>';
+  if (F && F.stands.some((s) => s.spot && s.base[yi].year >= s.spot.start && s.base[yi].pest >= 2.5)) h += '<span class="chip"><i style="background:#5c1414;border-radius:50%"></i>Active bark beetle spot</span>';
+  return h;
+}
+
+/* ---------- tooltip, small SVG charts, bar rows ---------- */
+'use strict';
+
+const Tip = {
+  el: null,
+  show(html, e) {
+    if (!this.el) this.el = document.getElementById('tooltip');
+    const t = this.el;
+    t.innerHTML = html;
+    t.classList.add('is-on');
+    const w = t.offsetWidth, h = t.offsetHeight;
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + w > window.innerWidth - 8) x = e.clientX - w - 12;
+    if (y + h > window.innerHeight - 8) y = e.clientY - h - 12;
+    t.style.left = Math.max(4, x) + 'px';
+    t.style.top = Math.max(4, y) + 'px';
+  },
+  hide() { if (this.el) this.el.classList.remove('is-on'); },
+};
+
+function niceTicks(a, b, n) {
+  const step0 = (b - a) / Math.max(1, n);
+  const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const r = step0 / mag;
+  const step = (r >= 5 ? 5 : r >= 2 ? 2 : 1) * mag;
+  const out = [];
+  for (let v = Math.ceil(a / step - 1e-9) * step; v <= b + 1e-9; v += step) out.push(Math.round(v * 1e6) / 1e6 + 0);
+  return out;
+}
+
+/* cfg: { x:[..], series:[{name, values, color}], dec, domain:[lo,hi], h, lines:[{y, label}], label, xfmt, markX } */
+function lineChart(el, cfg) {
+  el._cfg = cfg;
+  el.classList.add('chart');
+  const W = Math.max(220, Math.floor(el.clientWidth || 320)), H = cfg.h || 170;
+  const m = { l: 36, r: 16, t: 12, b: 22 };
+  const xs = cfg.x, x0 = xs[0], x1 = xs[xs.length - 1];
+  let lo = Infinity, hi = -Infinity;
+  if (cfg.domain) { lo = cfg.domain[0]; hi = cfg.domain[1]; }
+  else {
+    cfg.series.forEach((s) => s.values.forEach((v) => { if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }));
+    (cfg.lines || []).forEach((l) => { lo = Math.min(lo, l.y); hi = Math.max(hi, l.y); });
+    const pad = (hi - lo) * 0.15 || 1;
+    lo = Math.max(0, lo - pad); hi += pad;
+  }
+  const X = (v) => m.l + ((v - x0) / (x1 - x0 || 1)) * (W - m.l - m.r);
+  const Y = (v) => H - m.b - ((v - lo) / (hi - lo || 1)) * (H - m.t - m.b);
+  const f = (v) => (cfg.dec ? fmt1(v) : fmt0(v));
+  const xf = cfg.xfmt || ((v) => String(Math.round(v)));
+  let s = '';
+  if (cfg.series.length > 1) {
+    s += '<div class="chart__legend">' + cfg.series.map((q) => `<span><i style="border-color:${q.color}"></i>${esc(q.name)}</span>`).join('') + '</div>';
+  }
+  s += `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(cfg.label || 'Chart')}">`;
+  niceTicks(lo, hi, 3).forEach((t) => {
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(t).toFixed(1)}" y2="${Y(t).toFixed(1)}" stroke="#dfe1e2" stroke-width="1"/>`;
+    s += `<text x="${m.l - 6}" y="${(Y(t) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#5c6470">${f(t)}</text>`;
+  });
+  const every = Math.max(1, Math.ceil(40 / ((W - m.l - m.r) / Math.max(1, xs.length - 1))));
+  xs.forEach((v, i) => {
+    if ((xs.length - 1 - i) % every) return;
+    s += `<text x="${X(v).toFixed(1)}" y="${H - 6}" text-anchor="${i === xs.length - 1 ? 'end' : i === 0 ? 'start' : 'middle'}" font-size="11" fill="#5c6470">${xf(v)}</text>`;
+  });
+  s += `<line x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}" stroke="#a9aeb1" stroke-width="1"/>`;
+  (cfg.lines || []).forEach((l) => {
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(l.y).toFixed(1)}" y2="${Y(l.y).toFixed(1)}" stroke="#1b1b1b" stroke-width="1"/>`;
+    s += `<text x="${m.l + 4}" y="${(Y(l.y) - 4).toFixed(1)}" text-anchor="start" font-size="11" fill="#1b1b1b" stroke="#fff" stroke-width="3" paint-order="stroke">${esc(l.label)}</text>`;
+  });
+  cfg.series.forEach((q, qi) => {
+    const pts = q.values.map((v, i) => (v == null ? null : [X(xs[i]), Y(v)])).filter(Boolean);
+    if (!pts.length) return;
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    if (qi === 0 && cfg.area !== false) s += `<path d="${d} L${pts[pts.length - 1][0].toFixed(1)} ${H - m.b} L${pts[0][0].toFixed(1)} ${H - m.b} Z" fill="${q.color}" opacity="0.1"/>`;
+    s += `<path d="${d}" fill="none" stroke="${q.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"${q.dash ? ' stroke-dasharray="5 4"' : ''}/>`;
+    const e = pts[pts.length - 1];
+    s += `<circle cx="${e[0].toFixed(1)}" cy="${e[1].toFixed(1)}" r="4.5" fill="${q.color}" stroke="#fff" stroke-width="2"/>`;
+  });
+  if (cfg.markX != null) s += `<line x1="${X(cfg.markX).toFixed(1)}" x2="${X(cfg.markX).toFixed(1)}" y1="${m.t}" y2="${H - m.b}" stroke="#1b1b1b" stroke-width="1" stroke-dasharray="2 3"/>`;
+  s += `<g class="hov" visibility="hidden"><line y1="${m.t}" y2="${H - m.b}" stroke="#5c6470" stroke-width="1"/>` +
+    cfg.series.map((q) => `<circle r="4.5" fill="${q.color}" stroke="#fff" stroke-width="2"/>`).join('') + '</g>';
+  s += `<rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent" class="hit"/></svg>`;
+  el.innerHTML = s;
+  const svg = el.querySelector('svg'), hov = svg.querySelector('.hov'), hit = svg.querySelector('.hit');
+  const move = (e) => {
+    const r = svg.getBoundingClientRect();
+    const vx = x0 + ((((e.clientX - r.left) / r.width) * W - m.l) / (W - m.l - m.r)) * (x1 - x0);
+    let bi = 0, bd = Infinity;
+    xs.forEach((v, i) => { const dd = Math.abs(v - vx); if (dd < bd) { bd = dd; bi = i; } });
+    hov.setAttribute('visibility', 'visible');
+    hov.querySelector('line').setAttribute('x1', X(xs[bi])); hov.querySelector('line').setAttribute('x2', X(xs[bi]));
+    let html = `<b>${xf(xs[bi])}</b>`;
+    hov.querySelectorAll('circle').forEach((c, qi) => {
+      const v = cfg.series[qi].values[bi];
+      if (v == null) { c.setAttribute('visibility', 'hidden'); return; }
+      c.setAttribute('visibility', 'inherit'); c.setAttribute('cx', X(xs[bi])); c.setAttribute('cy', Y(v));
+      html += `<div class="kv"><span class="chip"><i style="background:${cfg.series[qi].color}"></i>${esc(cfg.series[qi].name)}</span><span class="num">${f(v)}${cfg.unit ? ' ' + esc(cfg.unit) : ''}</span></div>`;
+    });
+    Tip.show(html, e);
+  };
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerleave', () => { hov.setAttribute('visibility', 'hidden'); Tip.hide(); });
+}
+function refreshCharts(root) {
+  (root || document).querySelectorAll('.chart').forEach((el) => { if (el._cfg && el.offsetParent !== null) lineChart(el, el._cfg); });
+}
+
+/* A labelled horizontal bar on a 0 to 100 scale. */
+function barRow(label, value, color, extra) {
+  return `<div class="bar"><span>${esc(label)}</span><span class="bar__val">${extra != null ? extra : fmt0(value)}</span><span class="bar__track"><span class="bar__fill" style="width:${clamp(value, 0, 100).toFixed(1)}%;background:${color}"></span></span></div>`;
+}
+function riskChip(v) { const c = riskClass(v); return `<span class="chip"><i style="background:${c.color}"></i>${c.label}</span>`; }
+function practiceChip(key) {
+  const p = PRACTICES[key];
+  if (key === 'none') return '<span class="chip"><i style="background:' + p.color + '"></i>' + p.label + '</span>';
+  const dark = key === 'pest' || key === 'salvage' || key === 'fuel';
+  return `<span class="chip"><span class="code${dark ? ' code--dark' : ''}" style="background:${p.color}">${p.code}</span>${p.label}</span>`;
+}
+function priorityChip(key) { const p = PRIORITY[key]; return `<span class="chip"><i style="background:${p.color}"></i>${p.label}</span>`; }
+
+/* ---------- simulated lidar point clouds and a WebGL point viewer ---------- */
+'use strict';
+
+const HMAX = 24.384; // 80 ft: top of the height color scale, in metres
+const CLS = { ground: 0, herb: 1, shrub: 2, mid: 3, crown: 4, stem: 5, dead: 6, stressed: 7 };
+const groundZ = (x, y) => 1.7 * fbm(x / 70, y / 70, 5, 3) + 0.22 * fbm(x / 9, y / 9, 9, 2);
+
+/* One rectangular sample plot of a planted pine stand.
+   p: { x0, y0, L, W, htFt, tpa, tpa0, cr, ladder, cover, deadFrac, stress, thinned, rowAngle, seed, spot, budget } */
+function genPlot(p, out) {
+  const rng = mulberry32(p.seed);
+  const H = p.htFt / M2FT;
+  const rs = 3.35;
+  const sIn = M2_PER_ACRE / (Math.max(300, p.tpa0) * rs);
+  const ca = Math.cos(p.rowAngle), sa = Math.sin(p.rowAngle);
+  const cx = p.x0 + p.L / 2, cy = p.y0 + p.W / 2, R = Math.hypot(p.L, p.W) / 2 + 4;
+  const pAlive = clamp(p.tpa / (p.tpa0 * (p.thinned ? 0.8 : 1)), 0, 1);
+  const stressFrac = clamp((p.stress || 0) / 100 - 0.25, 0, 0.6) * 0.7;
+  const trees = [];
+  let row = 0;
+  if (H > 0.3 && p.tpa > 5) {
+    for (let v = -R; v <= R; v += rs, row++) {
+      const takeRow = p.thinned && row % 5 === 2;
+      for (let u = -R + (row % 2) * sIn * 0.5; u <= R; u += sIn) {
+        const jx = rng(), jy = rng(), r1 = rng(), r2 = rng(), r3 = rng(), r4 = rng(), r5 = rng(), r6 = rng(), r7 = rng();
+        const x = cx + u * ca - v * sa + (jx - 0.5) * 0.5, y = cy + u * sa + v * ca + (jy - 0.5) * 0.5;
+        if (x < p.x0 || x > p.x0 + p.L || y < p.y0 || y > p.y0 + p.W) continue;
+        if (takeRow || r1 > pAlive) continue;
+        let dead = r2 < p.deadFrac * 0.3;
+        if (p.spot) {
+          const d = Math.hypot(x - p.spot.x, y - p.spot.y);
+          if (d < p.spot.r) dead = r2 < 0.92 - 0.55 * (d / p.spot.r);
+        }
+        let ht = H * (1 + 0.11 * (r3 + r4 - 1));
+        if (!p.thinned && r5 < 0.1 && H > 6) ht *= 0.74;
+        trees.push({ x, y, ht, dead, stressed: !dead && r6 < stressFrac, h: r7, k: r5 });
+      }
+    }
+  }
+  const area = p.L * p.W;
+  const push = (x, y, z, g, cls, inten, hash) => { out.push(x, y, z, clamp((z - g) / HMAX, 0, 1), cls, inten, hash); };
+  const st = { trees: trees.length, dead: 0, sumHt: 0, strata: [0, 0, 0, 0], n: 0 };
+  const tally = (hAbove) => { st.strata[hAbove < 0.15 ? 0 : hAbove < 2 ? 1 : hAbove < 5 ? 2 : 3]++; st.n++; };
+
+  /* crowns and stems */
+  const cr0 = clamp(p.cr, 0.22, 0.97);
+  let sumW = 0;
+  trees.forEach((t) => {
+    t.cl = t.ht * clamp(cr0 * (0.88 + 0.24 * t.k), 0.2, 0.98);
+    t.rc = clamp(0.95 * Math.sqrt(M2_PER_ACRE / Math.max(60, p.tpa) / Math.PI), 0.4, 0.2 * t.ht + 0.45) * (0.82 + 0.36 * t.h);
+    if (t.dead) t.rc *= 0.55;
+    t.w = (t.dead ? 0.2 : 1) * t.rc * t.cl;
+    sumW += t.w;
+    st.sumHt += t.ht; if (t.dead) st.dead++;
+  });
+  for (const t of trees) {
+    const g = groundZ(t.x, t.y);
+    const n = Math.round(clamp((p.budget * t.w) / (sumW || 1), 14, 900));
+    const cls = t.dead ? CLS.dead : t.stressed ? CLS.stressed : CLS.crown;
+    for (let k = 0; k < n; k++) {
+      const u = rng();
+      const d = rng() < 0.65 ? 1 - Math.sqrt(1 - u) : u;
+      const prof = d < 0.7 ? Math.pow(d / 0.7, 0.72) : 1 - 0.38 * Math.pow((d - 0.7) / 0.3, 1.6);
+      const ang = rng() * 6.2832;
+      const lobe = 1 + 0.2 * Math.sin(ang * 3 + t.h * 6.28 + d * 5) + 0.1 * Math.sin(ang * 7 + t.h * 40);
+      const f = 1 - 0.55 * Math.pow(rng(), 2.2);
+      const rr = t.rc * prof * lobe * f;
+      const z = g + t.ht - d * t.cl + 0.07 * (rng() - 0.5);
+      push(t.x + rr * Math.cos(ang) + 0.05 * (rng() - 0.5), t.y + rr * Math.sin(ang) + 0.05 * (rng() - 0.5), z, g, cls, t.dead ? 0.3 + 0.2 * rng() : 0.55 + 0.35 * rng(), t.h);
+      tally(z - g);
+    }
+    const bole = t.ht - t.cl * 0.85;
+    if (bole > 1) {
+      const ns = t.dead ? 16 : p.thinned ? 11 : 6;
+      for (let k = 0; k < ns; k++) {
+        const z = g + 0.3 + rng() * (bole - 0.3);
+        push(t.x + 0.12 * (rng() - 0.5), t.y + 0.12 * (rng() - 0.5), z, g, CLS.stem, 0.35 + 0.2 * rng(), t.h);
+        tally(z - g);
+      }
+    }
+  }
+
+  /* understory: shrubs and saplings that carry fire into the crowns */
+  const nClump = Math.round((p.ladder * area) / 20);
+  const topMax = Math.min(p.ladder > 0.55 ? 5.4 : 2.9, Math.max(0.8, 0.62 * H + 0.6));
+  for (let c = 0; c < nClump; c++) {
+    const x0 = p.x0 + rng() * p.L, y0 = p.y0 + rng() * p.W;
+    const top = 0.5 + Math.pow(rng(), 1.6) * (topMax - 0.5), rad = 0.45 + rng() * 1.2;
+    const n = Math.round(16 + 42 * top * rad);
+    const g = groundZ(x0, y0), h = rng();
+    for (let k = 0; k < n; k++) {
+      const ang = rng() * 6.2832, el = Math.acos(rng()), f = 1 - 0.6 * Math.pow(rng(), 2);
+      const x = x0 + Math.sin(el) * Math.cos(ang) * rad * f, y = y0 + Math.sin(el) * Math.sin(ang) * rad * f;
+      const hz = 0.1 + Math.cos(el) * top * f;
+      push(x, y, g + hz, g, hz < 0.5 ? CLS.herb : hz < 2 ? CLS.shrub : CLS.mid, 0.5 + 0.3 * rng(), h);
+      tally(hz);
+    }
+  }
+  const nHerb = Math.round(area * (0.25 + 1.3 * (1 - p.cover / 100)));
+  for (let k = 0; k < nHerb; k++) {
+    const x = p.x0 + rng() * p.L, y = p.y0 + rng() * p.W, g = groundZ(x, y), hz = 0.03 + Math.pow(rng(), 2) * 0.4;
+    push(x, y, g + hz, g, CLS.herb, 0.5 + 0.3 * rng(), rng());
+    tally(hz);
+  }
+  const nGround = Math.round(area * 3.6);
+  for (let k = 0; k < nGround; k++) {
+    const x = p.x0 + rng() * p.L, y = p.y0 + rng() * p.W, g = groundZ(x, y);
+    push(x, y, g + 0.03 * (rng() - 0.5), g, CLS.ground, 0.3 + 0.25 * rng(), rng());
+    tally(0);
+  }
+  st.meanHtFt = trees.length ? (st.sumHt / trees.length) * M2FT : 0;
+  st.tpa = (trees.length / area) * M2_PER_ACRE;
+  return st;
+}
+
+function finishCloud(arr, bounds) {
+  const data = new Float32Array(arr);
+  let zmax = -Infinity, zmin = Infinity;
+  for (let i = 2; i < data.length; i += 7) { if (data[i] > zmax) zmax = data[i]; if (data[i] < zmin) zmin = data[i]; }
+  return { data, count: data.length / 7, x0: bounds.x0, x1: bounds.x1, y0: bounds.y0, y1: bounds.y1, zmin, zmax };
+}
+
+/* Point cloud for one stand in one year. after = true shows the stand after the recommended thinning. */
+function standCloud(stand, yi, after) {
+  const b = stand.base[yi], d = stand.derived[yi];
+  let ba = b.ba, tpa = b.tpa, thinned = b.lastThin != null;
+  if (after) {
+    const n = applyTreatment(b, 'thin', stand.res1);
+    ba = n.ba; tpa = n.tpa; thinned = true;
+  }
+  const L = 100, W = 60;
+  const spotOn = stand.spot && b.year >= stand.spot.start && b.pest >= 2.5;
+  const spec = {
+    x0: 0, y0: 0, L, W, htFt: b.age < 1 ? 0 : b.ht, tpa: b.age < 1 ? 0 : tpa, tpa0: stand.tpa0,
+    cr: clamp(0.92 - 0.58 * (ba / baMax(stand.si)) + (b.age < 8 ? 0.1 : 0), 0.28, 0.95),
+    ladder: b.lad, cover: after ? Math.min(d.cover, 100 * (1 - Math.exp(-ba / 50))) : d.cover,
+    deadFrac: spotOn ? 0.02 : clamp(b.mort / 100, 0, 0.5), stress: d.stress, thinned, rowAngle: stand.rowAngle,
+    seed: 7000 + stand.id * 131, budget: 175000,
+    spot: spotOn ? { x: 62, y: 32, r: 7 + b.pest * 1.15 } : null,
+  };
+  const arr = [];
+  const stats = genPlot(spec, arr);
+  const cloud = finishCloud(arr, { x0: 0, x1: L, y0: 0, y1: W });
+  cloud.stats = stats; cloud.spec = spec;
+  return cloud;
+}
+
+/* Wide strip for the home page banner: three stands side by side, separated by a road. */
+function heroCloud() {
+  const arr = [];
+  const parts = [
+    { x0: 0, L: 78, htFt: 34, tpa: 520, tpa0: 620, cr: 0.72, ladder: 0.55, cover: 78, thinned: false, seed: 11 },
+    { x0: 86, L: 96, htFt: 63, tpa: 300, tpa0: 640, cr: 0.44, ladder: 0.14, cover: 82, thinned: true, seed: 12 },
+    { x0: 190, L: 84, htFt: 54, tpa: 470, tpa0: 600, cr: 0.36, ladder: 0.42, cover: 92, thinned: false, seed: 13, spot: { x: 236, y: 30, r: 13 } },
+  ];
+  parts.forEach((q) => genPlot(Object.assign({ y0: 0, W: 62, deadFrac: 0.02, stress: 30, rowAngle: 0.5 * Math.PI + 0.12, budget: 86000 }, q), arr));
+  /* road gaps: bare ground only */
+  const rng = mulberry32(99);
+  [[78, 86], [182, 190]].forEach(([a, b]) => {
+    for (let k = 0; k < (b - a) * 62 * 4; k++) {
+      const x = a + rng() * (b - a), y = rng() * 62, g = groundZ(x, y);
+      arr.push(x, y, g - 0.1, 0, 0, 0.55 + 0.2 * rng(), rng());
+    }
+  });
+  return finishCloud(arr, { x0: 0, x1: 274, y0: 0, y1: 62 });
+}
+
+/* ---------- WebGL 2 viewer ---------- */
+const VS_POINTS = `#version 300 es
+precision highp float;
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec4 aAttr;
+uniform mat4 uProj, uView;
+uniform float uPx, uSize, uReveal, uX0, uX1;
+uniform int uMode;
+out vec3 vCol;
+vec3 ramp(float t){
+  vec3 c0=vec3(0.24,0.11,0.44), c1=vec3(0.20,0.36,0.63), c2=vec3(0.13,0.58,0.55), c3=vec3(0.38,0.77,0.38), c4=vec3(0.87,0.90,0.25), c5=vec3(0.99,0.97,0.66);
+  t=clamp(t,0.0,1.0)*5.0;
+  if(t<1.0) return mix(c0,c1,t);
+  if(t<2.0) return mix(c1,c2,t-1.0);
+  if(t<3.0) return mix(c2,c3,t-2.0);
+  if(t<4.0) return mix(c3,c4,t-3.0);
+  return mix(c4,c5,t-4.0);
+}
+vec3 hue(float h){ vec3 p=abs(fract(vec3(h)+vec3(0.0,0.6667,0.3333))*6.0-3.0); return clamp(p-1.0,0.0,1.0); }
+void main(){
+  vec4 mv=uView*vec4(aPos,1.0);
+  gl_Position=uProj*mv;
+  float h=aAttr.x, cls=aAttr.y, inten=aAttr.z, th=aAttr.w;
+  gl_PointSize=clamp(uPx*uSize*(cls<0.5?1.3:1.0)/max(0.5,-mv.z),1.6,18.0);
+  float xr=(aPos.x-uX0)/max(1.0,uX1-uX0);
+  if(xr>uReveal) gl_Position=vec4(2.0,2.0,2.0,1.0);
+  vec3 c;
+  if(uMode==0){ c=ramp(h)*(0.86+0.14*inten); }
+  else if(uMode==1){
+    if(cls<0.5) c=vec3(0.60,0.48,0.36);
+    else if(cls<2.5) c=vec3(0.76,0.83,0.44);
+    else if(cls<3.5) c=vec3(0.36,0.68,0.34);
+    else c=vec3(0.10,0.44,0.24)*(0.8+0.5*h);
+    c*=0.86+0.14*inten;
+  }
+  else if(uMode==2){ c=vec3(0.16+0.84*inten); }
+  else if(uMode==3){
+    if(cls>3.5) c=mix(vec3(1.0),hue(th),0.66)*(0.72+0.3*h);
+    else if(cls<0.5) c=vec3(0.30,0.27,0.24);
+    else c=vec3(0.36,0.40,0.33);
+  }
+  else {
+    if(cls>6.5) c=vec3(0.88,0.78,0.26);
+    else if(cls>5.5) c=vec3(0.80,0.30,0.20);
+    else if(cls>4.5) c=vec3(0.46,0.39,0.33);
+    else if(cls>3.5) c=mix(vec3(0.08,0.36,0.19),vec3(0.44,0.80,0.38),clamp(h*1.25,0.0,1.0));
+    else if(cls>0.5) c=vec3(0.36,0.48,0.31);
+    else c=vec3(0.36,0.31,0.26);
+  }
+  vCol=c;
+}`;
+const FS_POINTS = `#version 300 es
+precision highp float;
+in vec3 vCol;
+out vec4 o;
+void main(){
+  vec2 p=gl_PointCoord*2.0-1.0;
+  float r2=dot(p,p);
+  if(r2>1.0) discard;
+  o=vec4(vCol*(0.84+0.16*sqrt(1.0-r2)),1.0);
+}`;
+const VS_POST = `#version 300 es
+out vec2 vUv;
+void main(){ vec2 p=vec2(float((gl_VertexID<<1)&2),float(gl_VertexID&2)); vUv=p; gl_Position=vec4(p*2.0-1.0,0.0,1.0); }`;
+const FS_POST = `#version 300 es
+precision highp float;
+uniform sampler2D uColor;
+uniform highp sampler2D uDepth;
+uniform vec2 uInv;
+uniform float uNear, uFar, uStrength, uRadius;
+uniform vec3 uTop, uBot;
+in vec2 vUv;
+out vec4 o;
+float lin(float d){ float z=d*2.0-1.0; return (2.0*uNear*uFar)/(uFar+uNear-z*(uFar-uNear)); }
+void main(){
+  float d=texture(uDepth,vUv).r;
+  vec3 bg=mix(uBot,uTop,smoothstep(0.0,1.0,vUv.y));
+  if(d>=0.999999){ o=vec4(bg,1.0); return; }
+  float ld=log2(lin(d));
+  float sum=0.0;
+  for(int i=0;i<8;i++){
+    float a=float(i)*0.7853982;
+    float dn=texture(uDepth,vUv+vec2(cos(a),sin(a))*uInv*uRadius).r;
+    float ln=dn>=0.999999?log2(uFar):log2(lin(dn));
+    sum+=max(0.0,ld-ln);
+  }
+  float shade=exp(-sum/8.0*300.0*uStrength);
+  vec3 c=texture(uColor,vUv).rgb*(0.25+0.75*shade);
+  float fog=clamp((lin(d)-uNear)/(uFar-uNear),0.0,1.0);
+  o=vec4(mix(c,bg,fog*fog*0.55),1.0);
+}`;
+
+const Mat = {
+  persp(fovy, aspect, n, f) {
+    const t = 1 / Math.tan(fovy / 2);
+    return new Float32Array([t / aspect, 0, 0, 0, 0, t, 0, 0, 0, 0, (f + n) / (n - f), -1, 0, 0, (2 * f * n) / (n - f), 0]);
+  },
+  look(e, c, up) {
+    let zx = e[0] - c[0], zy = e[1] - c[1], zz = e[2] - c[2];
+    let l = Math.hypot(zx, zy, zz); zx /= l; zy /= l; zz /= l;
+    let xx = up[1] * zz - up[2] * zy, xy = up[2] * zx - up[0] * zz, xz = up[0] * zy - up[1] * zx;
+    l = Math.hypot(xx, xy, xz) || 1; xx /= l; xy /= l; xz /= l;
+    const yx = zy * xz - zz * xy, yy = zz * xx - zx * xz, yz = zx * xy - zy * xx;
+    return new Float32Array([xx, yx, zx, 0, xy, yy, zy, 0, xz, yz, zz, 0, -(xx * e[0] + xy * e[1] + xz * e[2]), -(yx * e[0] + yy * e[1] + yz * e[2]), -(zx * e[0] + zy * e[1] + zz * e[2]), 1]);
+  },
+};
+
+class CloudView {
+  constructor(el, opts) {
+    this.el = el;
+    this.o = Object.assign({ interactive: true, top: [0.1, 0.14, 0.12], bot: [0.035, 0.05, 0.045], size: 0.2, edl: 0.55, fov: 38 }, opts || {});
+    this.canvas = el.tagName === 'CANVAS' ? el : el.querySelector('canvas');
+    this.box = el.tagName === 'CANVAS' ? el.parentElement : el;
+    this.mode = 0; this.size = this.o.size; this.auto = !!this.o.auto; this.active = false;
+    this.cam = { t: [50, 30, 8], r: 120, th: -1.05, ph: 0.42 };
+    this.reveal = 1; this.count = 0; this.cloud = null; this._raf = 0; this._last = 0; this.drift = null;
+    const gl = this.canvas.getContext('webgl2', { antialias: false, alpha: false, depth: true, powerPreference: 'high-performance' });
+    this.gl = gl; this.ok = !!gl;
+    if (!gl) return;
+    try {
+      this.pPoints = this._prog(VS_POINTS, FS_POINTS);
+      this.pPost = this._prog(VS_POST, FS_POST);
+    } catch (err) { this.ok = false; this.err = String(err); return; }
+    this.vao = gl.createVertexArray(); this.vbo = gl.createBuffer();
+    gl.bindVertexArray(this.vao); gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 28, 0);
+    gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 28, 12);
+    gl.bindVertexArray(null);
+    this.vaoPost = gl.createVertexArray();
+    this.fbo = null;
+    if (this.o.interactive) this._bind();
+    new ResizeObserver(() => { this._size(); this.kick(); }).observe(this.canvas);
+    this._size();
+  }
+  _prog(vs, fs) {
+    const gl = this.gl;
+    const mk = (type, src) => {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    };
+    const p = gl.createProgram();
+    gl.attachShader(p, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    const u = {};
+    const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); u[info.name] = gl.getUniformLocation(p, info.name); }
+    return { p, u };
+  }
+  _size() {
+    const gl = this.gl, c = this.canvas;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr);
+    if (!w || !h || (w === this.w && h === this.h)) return;
+    this.w = w; this.h = h; this.dpr = dpr; c.width = w; c.height = h;
+    if (this.fbo) { gl.deleteFramebuffer(this.fbo); gl.deleteTexture(this.tCol); gl.deleteTexture(this.tDep); }
+    const tex = (ifmt, fmt, type) => {
+      const t = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texImage2D(gl.TEXTURE_2D, 0, ifmt, w, h, 0, fmt, type, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      return t;
+    };
+    this.tCol = tex(gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE);
+    this.tDep = tex(gl.DEPTH_COMPONENT24, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT);
+    this.fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.tCol, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.tDep, 0);
+    this.fboOk = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+  setCloud(cloud, keepCamera, animate) {
+    if (!this.ok) return;
+    const gl = this.gl;
+    this.cloud = cloud; this.count = cloud.count;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, cloud.data, gl.STATIC_DRAW);
+    if (!keepCamera) this.home();
+    const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.reveal = animate && !still ? 0 : 1;
+    this.kick();
+  }
+  home(view) {
+    const c = this.cloud; if (!c) return;
+    const L = c.x1 - c.x0, W = c.y1 - c.y0, top = Math.max(6, c.zmax - c.zmin);
+    this.cam.t = [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, c.zmin + top * 0.3];
+    const span = Math.hypot(L, W) * Math.max(1, 1.42 / ((this.w || 3) / (this.h || 2)));
+    if (view === 'top') { this.cam.th = -Math.PI / 2; this.cam.ph = 1.553; this.cam.r = span * 1.5; }
+    else if (view === 'side') { this.cam.th = -Math.PI / 2; this.cam.ph = 0.03; this.cam.r = span * 1.3; }
+    else { this.cam.th = -1.12; this.cam.ph = 0.42; this.cam.r = span * 1.42; }
+    this.kick();
+  }
+  setActive(on) { this.active = on; if (on) { this._size(); this.kick(); } }
+  kick() { if (!this.ok || this._raf) return; this._raf = requestAnimationFrame((t) => this._frame(t)); }
+  _frame(t) {
+    this._raf = 0;
+    if (!this.active || !this.cloud) return;
+    const dt = Math.min(0.05, this._last ? (t - this._last) / 1000 : 0.016);
+    this._last = t;
+    let again = false;
+    if (this.reveal < 1) { this.reveal = Math.min(1, this.reveal + dt / 1.15); again = true; }
+    if (this.drift) { this.drift(t / 1000, this.cam); again = true; }
+    else if (this.auto && !this._drag) { this.cam.th += dt * 0.14; again = true; }
+    this.render();
+    if (again) this.kick(); else this._last = 0;
+  }
+  render() {
+    const gl = this.gl, cam = this.cam, c = this.cloud;
+    if (!this.w || !this.h) return;
+    const cp = Math.cos(cam.ph), sp = Math.sin(cam.ph);
+    const eye = [cam.t[0] + cam.r * cp * Math.cos(cam.th), cam.t[1] + cam.r * cp * Math.sin(cam.th), cam.t[2] + cam.r * sp];
+    const span = Math.hypot(c.x1 - c.x0, c.y1 - c.y0);
+    const near = Math.max(0.6, cam.r - span * 0.95), far = cam.r + span * 1.15 + 20;
+    const fov = (this.o.fov * Math.PI) / 180;
+    const proj = Mat.persp(fov, this.w / this.h, near, far);
+    const view = Mat.look(eye, cam.t, [0, 0, 1]);
+    const useFbo = this.fboOk;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, useFbo ? this.fbo : null);
+    gl.viewport(0, 0, this.w, this.h);
+    gl.clearColor(this.o.bot[0], this.o.bot[1], this.o.bot[2], 1); gl.clearDepth(1);
+    gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LESS); gl.depthMask(true);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    const P = this.pPoints;
+    gl.useProgram(P.p);
+    gl.uniformMatrix4fv(P.u.uProj, false, proj); gl.uniformMatrix4fv(P.u.uView, false, view);
+    gl.uniform1f(P.u.uPx, (this.h / 2) * (1 / Math.tan(fov / 2)));
+    gl.uniform1f(P.u.uSize, this.size);
+    gl.uniform1f(P.u.uReveal, this.reveal >= 1 ? 2 : this.reveal);
+    gl.uniform1f(P.u.uX0, c.x0); gl.uniform1f(P.u.uX1, c.x1);
+    gl.uniform1i(P.u.uMode, this.mode);
+    gl.bindVertexArray(this.vao);
+    gl.drawArrays(gl.POINTS, 0, this.count);
+    if (useFbo) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.disable(gl.DEPTH_TEST);
+      const Q = this.pPost;
+      gl.useProgram(Q.p);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.tCol); gl.uniform1i(Q.u.uColor, 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.tDep); gl.uniform1i(Q.u.uDepth, 1);
+      gl.uniform2f(Q.u.uInv, 1 / this.w, 1 / this.h);
+      gl.uniform1f(Q.u.uNear, near); gl.uniform1f(Q.u.uFar, far);
+      gl.uniform1f(Q.u.uStrength, this.o.edl); gl.uniform1f(Q.u.uRadius, 1.5 * this.dpr);
+      gl.uniform3fv(Q.u.uTop, this.o.top); gl.uniform3fv(Q.u.uBot, this.o.bot);
+      gl.bindVertexArray(this.vaoPost);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    gl.bindVertexArray(null);
+  }
+  _bind() {
+    const el = this.canvas, cam = this.cam;
+    const pts = new Map();
+    let last = null, pinch = null;
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    el.addEventListener('pointerdown', (e) => {
+      pts.set(e.pointerId, [e.clientX, e.clientY]);
+      try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), r: cam.r }; last = null; }
+      else { last = { x: e.clientX, y: e.clientY, pan: e.button === 2 || e.shiftKey }; this._drag = true; this.box.classList.add('is-drag'); }
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (pts.has(e.pointerId)) pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (pinch && pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        cam.r = clamp((pinch.r * pinch.d) / Math.max(10, Math.hypot(a[0] - b[0], a[1] - b[1])), 12, 520);
+        this.kick(); return;
+      }
+      if (!last) return;
+      const dx = e.clientX - last.x, dy = e.clientY - last.y;
+      last.x = e.clientX; last.y = e.clientY;
+      if (last.pan) {
+        const k = (cam.r * 0.0016);
+        const sx = -Math.sin(cam.th), sy = Math.cos(cam.th);
+        cam.t[0] -= sx * dx * k; cam.t[1] -= sy * dx * k; cam.t[2] = clamp(cam.t[2] + dy * k, -5, 40);
+      } else {
+        cam.th -= dx * 0.006; cam.ph = clamp(cam.ph + dy * 0.005, 0.02, 1.555);
+      }
+      this.kick();
+    });
+    const up = (e) => {
+      pts.delete(e.pointerId);
+      if (pts.size < 2) pinch = null;
+      if (pts.size === 0) { last = null; this._drag = false; this.box.classList.remove('is-drag'); this.kick(); }
+    };
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', (e) => { e.preventDefault(); cam.r = clamp(cam.r * Math.exp(e.deltaY * 0.0012), 12, 520); this.kick(); }, { passive: false });
+    el.addEventListener('dblclick', () => this.home());
+  }
+}
+
+/* Vertical profile: a 20 ft wide slice through the middle of the plot, drawn in 2D. */
+const RAMP_STOPS = [[61, 28, 112], [51, 92, 161], [33, 148, 140], [97, 196, 97], [222, 230, 64], [252, 247, 168]];
+function rampRgb(t) {
+  t = clamp(t, 0, 1) * 5;
+  const k = Math.min(4, Math.floor(t)), f = t - k;
+  return [0, 1, 2].map((j) => Math.round(lerp(RAMP_STOPS[k][j], RAMP_STOPS[k + 1][j], f)));
+}
+function drawProfile(canvas, cloud) {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  if (!W || !H) return;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  const g = canvas.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = '#0e1411'; g.fillRect(0, 0, W, H);
+  const m = { l: 34, r: 8, t: 8, b: 18 };
+  const zTop = HMAX + 1.5, yc = (cloud.y0 + cloud.y1) / 2, half = 3.05;
+  const X = (x) => m.l + ((x - cloud.x0) / (cloud.x1 - cloud.x0)) * (W - m.l - m.r);
+  const Y = (z) => H - m.b - (z / zTop) * (H - m.t - m.b);
+  g.font = '11px "Public Sans", system-ui, sans-serif'; g.textBaseline = 'middle';
+  [0, 20, 40, 60, 80].forEach((ft) => {
+    const y = Y(ft / M2FT);
+    g.strokeStyle = 'rgba(232,239,230,0.14)'; g.lineWidth = 1; g.beginPath(); g.moveTo(m.l, y); g.lineTo(W - m.r, y); g.stroke();
+    g.fillStyle = '#cfd8cc'; g.textAlign = 'right'; g.fillText(ft + ' ft', m.l - 5, y);
+  });
+  const d = cloud.data;
+  for (let i = 0; i < d.length; i += 7) {
+    if (Math.abs(d[i + 1] - yc) > half) continue;
+    const c = rampRgb(d[i + 3]);
+    g.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+    g.fillRect(X(d[i]) - 0.8, Y(d[i + 3] * HMAX) - 0.8, 1.7, 1.7);
+  }
+  g.fillStyle = '#cfd8cc'; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.fillText('0 ft', m.l, H - 4);
+  g.textAlign = 'right';
+  g.fillText(fmt0((cloud.x1 - cloud.x0) * M2FT) + ' ft along the plot', W - m.r, H - 4);
+}
+
+/* ---------- page logic ---------- */
+'use strict';
+
+(function () {
+  const F = buildForest();
+  const $ = (id) => document.getElementById(id);
+  const L = YEARS.length - 1;
+  const VIEWS = ['overview', 'risk-maps', 'priorities', 'forest-3d', 'tools', 'data'];
+  const still = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const state = { stand: F.ranked.length ? F.ranked[0].id : 1, year: NOW, layer: 'comb', filter: 'all', tool: 'advisor', view: null };
+  const yi = () => YEARS.indexOf(state.year);
+  const cur = () => F.byId(state.stand);
+  const SERIES = '#2a78d6', REF = '#898781';
+  const RISKS = [['wf', 'Wildfire'], ['dr', 'Drought'], ['pr', 'Pest']];
+  const show = {};
+  let heroSeen = true;
+
+  function val(st, key, i) {
+    const Lr = LAYER[key], v = st.ts[key][i];
+    return (Lr.dec ? fmt1(v) : fmt0(v)) + (Lr.classed || Lr.unit === 'index' ? '' : ' ' + Lr.unit);
+  }
+  function setStand(id) {
+    if (!id || !F.byId(id)) return;
+    state.stand = id;
+    [maps.rm, maps.pr].forEach((m) => m && m.select(id, false));
+    refresh();
+  }
+  function setYear(y) { state.year = y; refresh(); }
+  function refresh() { if (show[state.view]) show[state.view](); }
+  const maps = {};
+
+  /* ================= overview ================= */
+  const hero = new CloudView($('heroCanvas'), { interactive: false, top: [0.2, 0.28, 0.26], bot: [0.035, 0.055, 0.048], size: 0.27, fov: 30, edl: 0.5 });
+  if (hero.ok) {
+    hero.setCloud(heroCloud(), true, false);
+    hero.cam.r = 76; hero.cam.ph = 0.2; hero.cam.th = -Math.PI / 2 + 0.1; hero.cam.t = [137, 31, 12.5];
+    if (!still) hero.drift = (t, cam) => { const u = 0.5 - 0.5 * Math.cos((t * 2 * Math.PI) / 80); cam.t[0] = lerp(70, 204, u); cam.th = -Math.PI / 2 + 0.17 * Math.sin((t * 2 * Math.PI) / 52); };
+  }
+  (function overview() {
+    const now = F.summary[L];
+    const hi = now.byClass.high + now.byClass.vhigh;
+    const todo = F.stands.filter((s) => s.rec.practice !== 'none');
+    const urgent = todo.filter((s) => s.rec.cls === 'urgent');
+    const ages = F.stands.map((s) => NOW - s.planted);
+    $('ovLede').textContent = 'Pine Hollow is a ' + fmt0(F.totalAc) + '-acre loblolly pine plantation invented to show what the platform does. On the platform, AI models combine lidar, satellite and aerial imagery and forest inventory plots into a digital record of every stand, updated regularly. The maps and tools on this site read that record to show where wildfire, drought and pest risk is building and which stands to treat first.';
+    $('ovFacts').innerHTML = [
+      ['Area', fmt0(F.totalAc) + ' ac'], ['Stands', F.stands.length], ['Species', 'Loblolly pine'],
+      ['Stand age', Math.min(...ages) + ' to ' + Math.max(...ages) + ' yr'], ['Mean basal area', fmt0(now.mean.ba) + ' ft²/ac'],
+      ['Mean canopy height', fmt0(now.mean.ht) + ' ft'], ['Last update', 'Nov 2026'],
+    ].map((r) => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+    $('ovTiles').innerHTML = [
+      [fmt0(F.totalAc), 'acres of loblolly pine in ' + F.stands.length + ' stands'],
+      [fmt0(hi), 'acres at high or very high risk, ' + fmt0((hi / F.totalAc) * 100) + '% of the tract'],
+      [todo.length, 'stands need treatment within 24 months'],
+      [urgent.length, 'stands need action within 3 months'],
+    ].map((t) => `<div class="tile"><b class="num">${t[0]}</b><span>${t[1]}</span></div>`).join('');
+    maps.ov = new StandMap($('ovMap'), F, { mode: 'layer', layer: 'comb', year: NOW, zoom: false, controls: false, label: 'Map of combined risk class by stand in 2026' });
+    maps.ov.on('hover', (st, e) => {
+      if (!st) return Tip.hide();
+      Tip.show(`<b>Stand ${st.id}</b><div class="kv"><span>Highest risk</span><span>${riskChip(st.ts.comb[L])}</span></div><div class="kv"><span>Area</span><span class="num">${fmt0(st.areaAc)} ac</span></div>`, e);
+    });
+    maps.ov.on('select', (st) => { if (st) { setStand(st.id); location.hash = 'risk-maps'; } });
+    $('ovLegend').innerHTML = legendHTML('layer', 'comb', F, L);
+  })();
+  show.overview = () => {};
+
+  /* ================= risk maps ================= */
+  (function riskMaps() {
+    const groups = [...new Set(LAYERS.map((l) => l.group))];
+    $('rmLayers').innerHTML = groups.map((g) => `<h3>${g}</h3><ul class="sidenav">` +
+      LAYERS.filter((l) => l.group === g).map((l) => `<li><button type="button" data-layer="${l.key}"><span>${l.name}</span><small>${l.classed ? '' : l.unit}</small></button></li>`).join('') + '</ul>').join('');
+    $('rmLayers').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-layer]');
+      if (!b) return;
+      state.layer = b.getAttribute('data-layer');
+      refresh();
+    });
+    maps.rm = new StandMap($('rmMap'), F, { mode: 'layer', layer: state.layer, year: state.year, label: 'Interactive map of the example forest by stand' });
+    maps.rm.on('select', (st) => { if (st) setStand(st.id); });
+    maps.rm.on('hover', (st, e) => {
+      if (!st) return Tip.hide();
+      const i = yi(), Lr = LAYER[state.layer];
+      let h = `<b>Stand ${st.id}</b>`;
+      if (st.ts.age[i] < 0) h += `<div>Not yet planted in ${state.year}</div>`;
+      else {
+        h += `<div class="kv"><span>${Lr.classed ? 'Highest risk index' : Lr.name}</span><span class="num">${val(st, state.layer, i)}</span></div>`;
+        if (Lr.risk) h += `<div class="kv"><span>Class</span><span>${riskChip(st.ts[state.layer][i])}</span></div>`;
+      }
+      h += `<div class="kv"><span>Area</span><span class="num">${fmt0(st.areaAc)} ac</span></div>`;
+      Tip.show(h, e);
+    });
+    $('rmYearTicks').innerHTML = YEARS.map((y) => `<span>${y}</span>`).join('');
+    $('rmYear').addEventListener('input', (e) => { stop(); setYear(YEARS[+e.target.value]); });
+    let timer = 0;
+    function stop() { if (timer) { clearInterval(timer); timer = 0; $('rmPlay').textContent = 'Play 2019 to 2026'; } }
+    $('rmPlay').addEventListener('click', () => {
+      if (timer) return stop();
+      $('rmPlay').textContent = 'Pause';
+      setYear(YEARS[0]);
+      timer = setInterval(() => {
+        const i = yi();
+        if (i >= L) return stop();
+        setYear(YEARS[i + 1]);
+      }, 950);
+    });
+    show._stopPlay = stop;
+  })();
+  show['risk-maps'] = () => {
+    const i = yi(), st = cur(), Lr = LAYER[state.layer], b = st.base[i], d = st.derived[i];
+    document.querySelectorAll('#rmLayers [data-layer]').forEach((el) => el.classList.toggle('is-current', el.getAttribute('data-layer') === state.layer));
+    maps.rm.set({ layer: state.layer, year: state.year, selected: state.stand });
+    $('rmTitle').textContent = Lr.name + ', ' + state.year;
+    $('rmLegend').innerHTML = legendHTML('layer', state.layer, F, i);
+    $('rmYear').value = i; $('rmYearLabel').textContent = state.year;
+    $('rmStandTitle').textContent = 'Stand ' + st.id + ', ' + fmt0(st.areaAc) + ' acres';
+    const pre = b.age < 0;
+    $('rmFacts').innerHTML = (pre ? [['Status in ' + state.year, 'Not yet planted'], ['Planted', st.planted]] : [
+      ['Planted', st.planted + ' (age ' + b.age + ')'], ['Site index, base age 25', st.si + ' ft'],
+      ['Trees per acre', fmt0(b.tpa)], ['Basal area', fmt0(b.ba) + ' ft²/ac'], ['Mean stem diameter', fmt1(d.qmd) + ' in'],
+      ['Canopy height', fmt0(b.ht) + ' ft'], ['Canopy cover', fmt0(d.cover) + '%'], ['Aboveground biomass', fmt0(d.agb) + ' tons/ac'],
+      ['Fuel load', fmt1(b.fuel) + ' tons/ac'], ['Last thinned', b.lastThin || 'Never'], ['Last burned', b.lastBurn || 'Never'],
+    ]).map((r) => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+    const ev = st.events.filter((e) => e.y <= state.year).slice(-3).map((e) => e.y + ': ' + e.text.toLowerCase());
+    $('rmEvents').textContent = ev.length ? 'History: ' + ev.join('; ') + '.' : '';
+    $('rmChartTitle').textContent = Lr.name + (Lr.classed ? ' (index)' : ', ' + Lr.unit) + ', 2019 to 2026';
+    lineChart($('rmChart'), {
+      x: YEARS, unit: Lr.classed || Lr.unit === 'index' ? '' : Lr.unit, dec: Lr.dec, h: 190, markX: state.year,
+      domain: Lr.risk ? [0, 100] : null,
+      lines: Lr.risk ? [{ y: 60, label: 'High' }, { y: 75, label: 'Very high' }] : null,
+      series: [
+        { name: 'Stand ' + st.id, color: SERIES, values: st.ts[state.layer].map((v, k) => (st.ts.age[k] < 0 ? null : v)) },
+        { name: 'Tract average', color: REF, dash: true, values: F.summary.map((s) => s.mean[state.layer]) },
+      ],
+      label: Lr.name + ' for stand ' + st.id + ' and the tract average, 2019 to 2026',
+    });
+    $('rmRiskTitle').textContent = 'Risk in ' + state.year;
+    $('rmRisk').innerHTML = pre ? '<p class="note">No risk rating before planting.</p>' : RISKS.map(([k, name]) => {
+      const v = d[k], c = riskClass(v);
+      return barRow(name, v, c.color, fmt0(v) + ' ' + c.label);
+    }).join('');
+    const r = st.rec;
+    $('rmAction').innerHTML = `<span class="note">Recommended now</span><b>${PRACTICES[r.practice].label}</b>` +
+      (r.practice === 'none' ? '' : `<div style="margin:4px 0">${priorityChip(r.cls)} &nbsp; ${esc(r.whenText)}</div>`) + `<div>${esc(r.why)}</div>`;
+  };
+
+  /* ================= management priorities ================= */
+  (function priorities() {
+    const count = (f) => F.stands.filter(f);
+    const acres = (list) => fmt0(list.reduce((a, s) => a + s.areaAc, 0));
+    const todo = count((s) => s.rec.practice !== 'none');
+    $('prFilter').innerHTML = `<li><button type="button" data-f="all"><span>All practices</span><small>${todo.length} stands</small></button></li>` +
+      PRACTICE_ORDER.map((k) => { const l = count((s) => s.rec.practice === k); return `<li><button type="button" data-f="${k}"><span>${PRACTICES[k].label}</span><small>${l.length} · ${acres(l)} ac</small></button></li>`; }).join('');
+    $('prFilter').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-f]');
+      if (!b) return;
+      state.filter = b.getAttribute('data-f');
+      refresh();
+    });
+    $('prCounts').innerHTML = PRIORITY_ORDER.map((k) => { const l = count((s) => s.rec.cls === k); return `<dt>${priorityChip(k)}</dt><dd>${l.length} · ${acres(l)} ac</dd>`; }).join('');
+    maps.pr = new StandMap($('prMap'), F, { mode: 'priority', label: 'Map of management priority and recommended practice by stand' });
+    maps.pr.on('select', (st) => { if (st) setStand(st.id); });
+    maps.pr.on('hover', (st, e) => {
+      if (!st) return Tip.hide();
+      const r = st.rec;
+      Tip.show(`<b>Stand ${st.id}</b><div>${practiceChip(r.practice)}</div>` + (r.practice === 'none' ? '' : `<div class="kv"><span>Priority</span><span>${priorityChip(r.cls)}</span></div><div class="kv"><span>When</span><span>${esc(r.whenText)}</span></div>`) + `<div class="kv"><span>Area</span><span class="num">${fmt0(st.areaAc)} ac</span></div>`, e);
+    });
+    $('prLegend').innerHTML = legendHTML('priority');
+    const pick = (e) => { const row = e.target.closest('[data-stand]'); if (row) setStand(+row.getAttribute('data-stand')); };
+    $('prTable').addEventListener('click', pick);
+    $('prCal').addEventListener('click', pick);
+    $('prCal').addEventListener('pointermove', (e) => {
+      const row = e.target.closest('[data-stand]');
+      if (!row) return Tip.hide();
+      const st = F.byId(+row.getAttribute('data-stand'));
+      Tip.show(`<b>Stand ${st.id}, ${fmt0(st.areaAc)} ac</b><div>${practiceChip(st.rec.practice)}</div><div>${esc(st.rec.whenText)}</div>`, e);
+    });
+    $('prCal').addEventListener('pointerleave', () => Tip.hide());
+  })();
+  show.priorities = () => {
+    const f = state.filter;
+    document.querySelectorAll('#prFilter [data-f]').forEach((el) => el.classList.toggle('is-current', el.getAttribute('data-f') === f));
+    maps.pr.set({ selected: state.stand, filter: f === 'all' ? null : (s) => s.rec.practice === f });
+    const list = F.ranked.filter((s) => f === 'all' || s.rec.practice === f);
+    let months = '', years = '', run = 0;
+    for (let m = 0; m < CAL_MONTHS; m++) {
+      const c = calLabel(m);
+      months += `<span>${MONTH_ABBR[c.m].charAt(0)}<span class="cal__m">${MONTH_ABBR[c.m].slice(1)}</span></span>`;
+      run++;
+      if (c.m === 11 || m === CAL_MONTHS - 1) { years += `<span style="grid-column:span ${run}">${c.y}</span>`; run = 0; }
+    }
+    $('prCal').innerHTML = '<div class="cal"><div class="cal__label cal__corner"></div><div class="cal__years">' + years + '</div><div class="cal__label" style="border-bottom:1px solid var(--ink)"></div><div class="cal__months">' + months + '</div>' +
+      list.map((s) => {
+        const w = s.rec.window, p = PRACTICES[s.rec.practice];
+        return `<div class="cal__row" data-stand="${s.id}"><div class="cal__label" data-stand="${s.id}">${practiceChip(s.rec.practice).replace(p.label, 'Stand ' + s.id)}</div>` +
+          `<div class="cal__track" data-stand="${s.id}"><div class="cal__bar" style="left:calc(${((w[0] / CAL_MONTHS) * 100).toFixed(3)}% + 2px);width:calc(${(((w[1] - w[0] + 1) / CAL_MONTHS) * 100).toFixed(3)}% - 4px);background:${p.color}"></div></div></div>`;
+      }).join('') + '</div>';
+    $('prTableTitle').textContent = (f === 'all' ? 'Stands' : PRACTICES[f].label + ' stands') + ' ranked by priority';
+    $('prTable').innerHTML = '<thead><tr><th class="r">Rank</th><th class="r">Stand</th><th class="r">Acres</th><th>Practice</th><th>Priority</th><th>When</th><th>Highest risk</th></tr></thead><tbody>' +
+      list.map((s) => {
+        const d = s.derived[L];
+        const top = RISKS.map(([k, n]) => [d[k], n]).sort((a, b) => b[0] - a[0])[0];
+        return `<tr data-stand="${s.id}" class="${s.id === state.stand ? 'is-selected' : ''}"><td class="r">${s.rec.rank}</td><td class="r">${s.id}</td><td class="r">${fmt0(s.areaAc)}</td><td>${practiceChip(s.rec.practice)}</td><td>${priorityChip(s.rec.cls)}</td><td>${esc(s.rec.whenText)}</td><td><span class="chip" title="${riskClass(top[0]).label} risk"><i style="background:${riskClass(top[0]).color}"></i>${top[1]} ${fmt0(top[0])}, ${riskClass(top[0]).label.toLowerCase()}</span></td></tr>`;
+      }).join('') + '</tbody>';
+  };
+
+  /* ================= 3D forest ================= */
+  const MODES = [['Height', 0], ['Classification', 1], ['Return intensity', 2], ['Individual trees', 3], ['Tree health', 4]];
+  const viewer = new CloudView($('v3Box'), { interactive: true, auto: !still });
+  const v3 = { mode: 0, after: false, key: '', first: true, raf: 0 };
+  (function forest3d() {
+    $('v3Stand').innerHTML = F.stands.map((s) => `<option value="${s.id}">Stand ${s.id} · age ${NOW - s.planted}${s.rec.practice === 'none' ? '' : ' · ' + PRACTICES[s.rec.practice].label.toLowerCase()}</option>`).join('');
+    $('v3Stand').addEventListener('change', (e) => { v3.after = false; setStand(+e.target.value); });
+    $('v3Year').addEventListener('input', (e) => { v3.after = false; setYear(YEARS[+e.target.value]); });
+    $('v3Size').addEventListener('input', (e) => { viewer.size = +e.target.value / 100; viewer.kick(); });
+    $('v3Auto').checked = !still;
+    $('v3Auto').addEventListener('change', (e) => { viewer.auto = e.target.checked; viewer.kick(); });
+    $('v3After').addEventListener('change', (e) => { v3.after = e.target.checked; refresh(); });
+    $('v3Modes').innerHTML = MODES.map(([n, m]) => `<li><button type="button" data-mode="${m}">${n}</button></li>`).join('');
+    $('v3Modes').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-mode]');
+      if (!b) return;
+      v3.mode = +b.getAttribute('data-mode'); viewer.mode = v3.mode; viewer.kick(); legend3d();
+    });
+    document.querySelector('#v3Box .viewer__btns').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-view]');
+      if (b) viewer.home(b.getAttribute('data-view'));
+    });
+    $('v3Hint').textContent = 'Drag to rotate · Scroll to zoom · Shift and drag to move';
+    if (!viewer.ok) { $('v3Fallback').style.display = 'flex'; $('v3Hud').hidden = true; $('v3Legend').hidden = true; $('v3Hint').hidden = true; }
+  })();
+  function legend3d() {
+    document.querySelectorAll('#v3Modes [data-mode]').forEach((el) => el.classList.toggle('is-current', +el.getAttribute('data-mode') === v3.mode));
+    const chip = (c, t) => `<span class="chip"><i style="background:${c}"></i>${t}</span>`;
+    let h = '';
+    if (v3.mode === 0) {
+      h = 'Height above ground (ft)<div class="legend__bar" style="margin-top:4px;background:linear-gradient(90deg,' + RAMP_STOPS.map((c) => rgbCss(c)).join(',') + ')"></div><div class="legend__ticks">' +
+        [0, 20, 40, 60, 80].map((t) => `<span style="left:${(t / 80) * 100}%">${t}</span>`).join('') + '</div>';
+    } else if (v3.mode === 1) h = chip('#997a5c', 'Ground') + chip('#c2d470', 'Low vegetation') + chip('#5cad57', 'Medium vegetation') + chip('#1f7a43', 'High vegetation');
+    else if (v3.mode === 2) h = 'Return intensity<div class="legend__bar" style="margin-top:4px;background:linear-gradient(90deg,#292929,#ffffff)"></div><div class="legend__ticks"><span style="left:0">Weak</span><span style="left:100%">Strong</span></div>';
+    else if (v3.mode === 3) h = 'Each detected tree has its own color';
+    else h = chip('#4fae5a', 'Healthy crown') + chip('#e0c742', 'Stressed crown') + chip('#cc4d33', 'Dead or dying') + chip('#756354', 'Stem');
+    $('v3Legend').innerHTML = h;
+  }
+  show['forest-3d'] = () => {
+    const st = cur(), i = yi(), b = st.base[i];
+    $('v3Stand').value = st.id; $('v3Year').value = i; $('v3YearLabel').textContent = state.year;
+    const canThin = i === L && b.age >= 8 && b.ba > st.res1 + 8;
+    if (!canThin) v3.after = false;
+    $('v3AfterWrap').style.display = canThin ? 'flex' : 'none';
+    $('v3After').checked = v3.after;
+    $('v3AfterWrap').lastChild.textContent = ' Show after thinning to ' + st.res1 + ' ft²/ac';
+    $('v3Title').textContent = 'Stand ' + st.id + ', ' + state.year + (v3.after ? ', after thinning' : '');
+    legend3d();
+    const key = st.id + '_' + i + '_' + (v3.after ? 1 : 0);
+    if (key === v3.key) return;
+    const standChanged = !v3.key || v3.key.split('_')[0] !== String(st.id);
+    v3.key = key;
+    cancelAnimationFrame(v3.raf);
+    v3.raf = requestAnimationFrame(() => {
+      const cloud = standCloud(st, i, v3.after);
+      if (viewer.ok) { viewer.setCloud(cloud, !v3.first, standChanged); v3.first = false; }
+      const s = cloud.stats, d = st.derived[i];
+      $('v3Hud').innerHTML = b.age < 1 ? `<b>Stand ${st.id}, ${state.year}</b>${b.age < 0 ? 'Not yet planted' : 'Planted this year'}` :
+        `<b>Stand ${st.id}, ${state.year}${v3.after ? ', after thinning' : ''}</b>${b.age} years old · ${fmt0(s.tpa)} trees per acre · ${fmt0(s.meanHtFt)} ft tall`;
+      $('v3Stats').innerHTML = [
+        ['Trees found in the plot', fmt0(s.trees)], ['Trees per acre', fmt0(s.tpa)], ['Mean tree height', fmt0(s.meanHtFt) + ' ft'],
+        ['Dead or dying trees', fmt0(s.dead)], ['Canopy cover', fmt0(cloud.spec.cover) + '%'], ['Lidar returns', fmt0(cloud.count)],
+      ].map((r) => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
+      const names = ['Ground', 'Low vegetation, under 6 ft', 'Ladder fuels, 6 to 16 ft', 'Canopy, above 16 ft'];
+      const cols = ['#b9c4b0', '#8fb37d', '#4f8f4a', '#1f5c2a'];
+      $('v3Strata').innerHTML = [3, 2, 1, 0].map((k) => barRow(names[k], (s.strata[k] / s.n) * 100, cols[k], fmt0((s.strata[k] / s.n) * 100) + '%')).join('');
+      drawProfile($('v3Profile'), cloud);
+      v3.cloud = cloud;
+    });
+  };
+
+  /* ================= AI tools ================= */
+  const NOTES = {
+    thin: 'Thinning leaves slash on the ground, so wildfire risk rises a little until the next burn.',
+    burn: 'Fuel builds back over five to eight years, so the effect lasts only with repeat burns.',
+    fuel: 'Mulching or herbicide lowers fire spread now. Burning becomes an option as the trees grow taller.',
+    pest: 'Removing infested trees stops the spot. Density and water stress still set the long-term hazard.',
+    salvage: 'Salvage recovers value from dying trees and removes the beetle source. The harvested patch will need replanting.',
+    none: 'No treatment is tested. The bars show the current risk.',
+  };
+  const ad = { practice: null, res: 75, stand: null };
+  (function tools() {
+    $('tlNav').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-tool]');
+      if (!b) return;
+      state.tool = b.getAttribute('data-tool');
+      refresh();
+    });
+    $('adStand').innerHTML = F.stands.map((s) => `<option value="${s.id}">Stand ${s.id} · ${PRACTICES[s.rec.practice].label.toLowerCase()}</option>`).join('');
+    $('adStand').addEventListener('change', (e) => setStand(+e.target.value));
+    $('adPractice').addEventListener('change', (e) => { ad.practice = e.target.value; refresh(); });
+    $('adRes').addEventListener('input', (e) => { ad.res = +e.target.value; refresh(); });
+    $('plGoal').addEventListener('change', refresh);
+    $('plCap').addEventListener('input', refresh);
+    maps.pl = new StandMap($('plMap'), F, { mode: 'priority', zoom: false, controls: false, label: 'Map of the stands chosen for treatment' });
+    maps.pl.on('select', (st) => { if (st) setStand(st.id); });
+    maps.pl.on('hover', (st, e) => {
+      if (!st) return Tip.hide();
+      Tip.show(`<b>Stand ${st.id}</b><div>${practiceChip(st.rec.practice)}</div><div class="kv"><span>Area</span><span class="num">${fmt0(st.areaAc)} ac</span></div>`, e);
+    });
+    $('plTable').addEventListener('click', (e) => { const row = e.target.closest('[data-stand]'); if (row) setStand(+row.getAttribute('data-stand')); });
+  })();
+  function advisor() {
+    const st = cur(), b = st.base[L], d = st.derived[L], r = st.rec;
+    if (ad.stand !== st.id) { ad.stand = st.id; ad.practice = r.practice; ad.res = clamp(Math.round(st.res1 / 5) * 5, 60, 100); }
+    $('adStand').value = st.id;
+    $('adPractice').innerHTML = ['none'].concat(PRACTICE_ORDER).map((k) => `<option value="${k}"${k === ad.practice ? ' selected' : ''}>${k === 'none' ? 'No treatment' : PRACTICES[k].label}${k === r.practice && k !== 'none' ? ' (recommended)' : ''}</option>`).join('');
+    const thin = ad.practice === 'thin';
+    $('adResWrap').style.display = thin ? '' : 'none';
+    $('adRes').value = ad.res; $('adResLabel').textContent = ad.res;
+    const after = ad.practice === 'none' ? d : deriveState(applyTreatment(b, ad.practice, ad.res));
+    $('adAction').innerHTML = `<span class="note">Recommended for stand ${st.id}, ${fmt0(st.areaAc)} acres, age ${b.age}</span><b>${PRACTICES[r.practice].label}</b>` +
+      (r.practice === 'none' ? '' : `<div style="margin:4px 0">${priorityChip(r.cls)} &nbsp; ${esc(r.whenText)}</div>`) + `<div>${esc(r.why)}</div>`;
+    const top = RISKS.map(([k, n]) => [d[k], k, n]).sort((x, y) => y[0] - x[0])[0];
+    const parts = d.parts[top[1]];
+    let html = `<p class="note" style="margin-bottom:2px">${top[2]} risk is the highest of the three, at ${fmt0(top[0])}. Share of that score from each factor:</p>`;
+    if (parts) {
+      const tot = Object.values(parts).reduce((a, v) => a + v, 0) || 1;
+      html += Object.entries(parts).filter((p) => p[1] > 0.004).sort((x, y) => y[1] - x[1]).map(([n, v]) => barRow(n, (v / tot) * 100, '#565c65', fmt0((v / tot) * 100) + '%')).join('');
+    }
+    $('adDrivers').innerHTML = html;
+    $('adBefore').innerHTML = RISKS.map(([k, n]) => {
+      const a = d[k], z = after[k];
+      return `<div class="ba"><span>${n}</span><span class="ba__tracks"><span class="ba__t" title="Now"><i style="width:${a.toFixed(1)}%;background:${riskClass(a).color}"></i></span><span class="ba__t" title="After treatment"><i style="width:${z.toFixed(1)}%;background:${riskClass(z).color}"></i></span></span>` +
+        `<span class="ba__n num">${fmt0(a)} &rarr; <b>${fmt0(z)}</b><br><span class="note">${riskClass(z).label}</span></span></div>`;
+    }).join('');
+    $('adNote').textContent = 'Top bar: now. Bottom bar: after ' + (ad.practice === 'none' ? 'no treatment' : PRACTICES[ad.practice].label.toLowerCase()) + '. ' + NOTES[ad.practice];
+    if (thin) {
+      const base = projectBA(st, 10, null), cut = projectBA(st, 10, ad.res);
+      const xs = base.map((p) => p.year);
+      $('adChartTitle').textContent = 'Basal area over the next 10 years, ft²/ac';
+      lineChart($('adChart'), {
+        x: xs, unit: 'ft²/ac', h: 190, area: false, lines: [{ y: 118, label: 'Thinning due above 118' }],
+        series: [
+          { name: 'Thinned to ' + ad.res, color: SERIES, values: xs.map((y) => { const p = cut.filter((q) => Math.abs(q.year - y) < 0.02); return p.length ? p[p.length - 1].ba : null; }) },
+          { name: 'No thinning', color: REF, dash: true, values: base.map((p) => p.ba) },
+        ],
+        label: 'Projected basal area with and without thinning',
+      });
+    } else {
+      const key = ad.practice === 'burn' || ad.practice === 'fuel' ? 'fuel' : ad.practice === 'pest' || ad.practice === 'salvage' ? 'pest' : 'ba';
+      const Lr = LAYER[key];
+      $('adChartTitle').textContent = Lr.name + ' since 2019, ' + Lr.unit;
+      lineChart($('adChart'), {
+        x: YEARS, unit: Lr.unit, dec: Lr.dec, h: 190,
+        series: [
+          { name: 'Stand ' + st.id, color: SERIES, values: st.ts[key].map((v, k) => (st.ts.age[k] < 0 ? null : v)) },
+          { name: 'Tract average', color: REF, dash: true, values: F.summary.map((s) => s.mean[key]) },
+        ],
+        label: Lr.name + ' for stand ' + st.id + ' since 2019',
+      });
+    }
+  }
+  function planner() {
+    const goal = $('plGoal').value, cap = +$('plCap').value;
+    $('plCapLabel').textContent = cap;
+    const drop = (s) => { const d = s.derived[L], a = s.rec.after; return goal === 'all' ? d.wf - a.wf + (d.dr - a.dr) + (d.pr - a.pr) : d[goal] - a[goal]; };
+    const cand = F.stands.filter((s) => s.rec.practice !== 'none').map((s) => ({ s, drop: drop(s), urgent: s.rec.cls === 'urgent' ? 1 : 0 })).filter((c) => c.urgent || c.drop > 0.5);
+    cand.sort((x, y) => y.urgent - x.urgent || y.drop - x.drop);
+    let used = 0;
+    const chosen = [];
+    for (const c of cand) if (used + c.s.areaAc <= cap) { chosen.push(c); used += c.s.areaAc; }
+    const ids = new Set(chosen.map((c) => c.s.id));
+    const hiAc = (plan) => F.stands.reduce((a, s) => {
+      const d = plan && ids.has(s.id) ? s.rec.after : s.derived[L];
+      return a + (Math.max(d.wf, d.dr, d.pr) >= 60 ? s.areaAc : 0);
+    }, 0);
+    const meanDrop = chosen.length ? chosen.reduce((a, c) => a + c.drop * c.s.areaAc, 0) / used : 0;
+    $('plSummary').innerHTML = [
+      [chosen.length, 'stands in the plan'],
+      [fmt0(used), 'acres treated, of ' + cap + ' available'],
+      [fmt0(hiAc(false)) + ' &rarr; ' + fmt0(hiAc(true)), 'acres at high or very high risk, before and after'],
+      [fmt0(meanDrop), 'points of ' + (goal === 'all' ? 'combined risk' : LAYER[goal].name.toLowerCase()) + ' removed per treated acre, on average'],
+    ].map((t) => `<div class="tile"><b class="num">${t[0]}</b><span>${t[1]}</span></div>`).join('');
+    maps.pl.set({ marked: ids, filter: (s) => ids.has(s.id), selected: ids.has(state.stand) ? state.stand : null });
+    $('plTable').innerHTML = '<thead><tr><th class="r">Stand</th><th>Practice and timing</th><th class="r">Acres</th><th class="r">Risk drop</th></tr></thead><tbody>' +
+      (chosen.length ? chosen.map((c) => `<tr data-stand="${c.s.id}" class="${c.s.id === state.stand ? 'is-selected' : ''}"><td class="r">${c.s.id}</td><td>${practiceChip(c.s.rec.practice)}<div class="note">${esc(c.s.rec.whenText)}</div></td><td class="r">${fmt0(c.s.areaAc)}</td><td class="r">${fmt0(c.drop)}</td></tr>`).join('') :
+        '<tr><td colspan="4">No stand fits. Raise the acres you can treat.</td></tr>') + '</tbody>';
+  }
+  show.tools = () => {
+    document.querySelectorAll('#tlNav [data-tool]').forEach((el) => el.classList.toggle('is-current', el.getAttribute('data-tool') === state.tool));
+    $('tlAdvisor').hidden = state.tool !== 'advisor';
+    $('tlPlanner').hidden = state.tool !== 'planner';
+    if (state.tool === 'advisor') advisor(); else planner();
+  };
+
+  /* ================= data and methods ================= */
+  (function data() {
+    const src = {
+      ba: 'Airborne and spaceborne lidar, inventory plots', ht: 'Airborne and spaceborne lidar', cover: 'Lidar, aerial images', agb: 'Lidar, inventory plots',
+      fuel: 'Lidar, satellite imagery, burn history', stress: 'Satellite imagery', pest: 'Aerial images, satellite imagery', mort: 'Aerial images, repeat lidar',
+      wf: 'Risk model on fuel, understory and weather', dr: 'Risk model on density, soil and weather', pr: 'Risk model on density, stress and beetle activity', comb: 'Highest of the three risk indices',
+    };
+    $('dtLayers').innerHTML = '<thead><tr><th>Layer</th><th>Group</th><th>Unit</th><th>Example data sources</th></tr></thead><tbody>' +
+      LAYERS.map((l) => `<tr style="cursor:default"><td>${l.name}</td><td>${l.group}</td><td>${l.unit}</td><td class="wrapcell">${src[l.key]}</td></tr>`).join('') + '</tbody>';
+  })();
+  show.data = () => {};
+
+  /* ================= navigation ================= */
+  function go(v, user) {
+    const changed = v !== state.view;
+    if (changed && show._stopPlay) show._stopPlay();
+    state.view = v;
+    VIEWS.forEach((id) => $('view-' + id).classList.toggle('is-active', id === v));
+    document.querySelectorAll('[data-nav]').forEach((a) => { if (a.getAttribute('data-nav') === v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    $('siteNav').classList.remove('is-open'); $('menuBtn').setAttribute('aria-expanded', 'false');
+    Tip.hide();
+    hero.setActive(v === 'overview' && heroSeen);
+    viewer.setActive(v === 'forest-3d');
+    refresh();
+    if (changed && user) window.scrollTo(0, 0);
+  }
+  function route(user) {
+    const h = (location.hash || '').replace('#', '');
+    if (VIEWS.includes(h)) go(h, user);
+    else if (!state.view) go('overview', false);
+  }
+  window.addEventListener('hashchange', () => route(true));
+  if (window.IntersectionObserver) {
+    new IntersectionObserver((en) => { heroSeen = en[0].isIntersecting; hero.setActive(state.view === 'overview' && heroSeen); }, { threshold: 0.02 }).observe($('heroCanvas'));
+  }
+  $('menuBtn').addEventListener('click', () => {
+    const open = $('siteNav').classList.toggle('is-open');
+    $('menuBtn').setAttribute('aria-expanded', String(open));
+  });
+  $('skipLink').addEventListener('click', (e) => { e.preventDefault(); $('main').focus(); });
+  $('standSearch').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $('standSearchInput');
+    const n = parseInt(input.value.replace(/[^0-9]/g, ''), 10);
+    if (!n || !F.byId(n)) { input.setCustomValidity('Enter a stand number from 1 to ' + F.stands.length + '.'); input.reportValidity(); return; }
+    input.setCustomValidity(''); input.value = '';
+    setStand(n);
+    if (state.view !== 'risk-maps') location.hash = 'risk-maps';
+  });
+  $('standSearchInput').addEventListener('input', (e) => e.target.setCustomValidity(''));
+  let rz = 0;
+  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { refreshCharts(); if (state.view === 'forest-3d' && v3.cloud) drawProfile($('v3Profile'), v3.cloud); }, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => Object.values(maps).forEach((m) => m.invalidate()));
+  route(false);
+  window.__pine = { F, state, maps, viewer, hero };
+})();
+
+</script>
+</body>
+</html>
